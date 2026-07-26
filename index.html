@@ -72,7 +72,10 @@ a{color:var(--brand);text-decoration:none}
     radial-gradient(circle at 88% -30%, rgba(123,79,196,.55), transparent 55%),
     linear-gradient(115deg, var(--brand-deep) 0%, #43217A 55%, #5B2E9D 100%);
   color:#fff; position:relative; overflow:hidden;
-  padding:26px 20px 22px; padding-top:calc(26px + env(safe-area-inset-top));
+  padding:26px 20px 22px;
+  padding-top:calc(26px + env(safe-area-inset-top));
+  padding-left:calc(20px + env(safe-area-inset-left));
+  padding-right:calc(20px + env(safe-area-inset-right));
 }
 .banner::after{ /* placa de agar: colonias */
   content:''; position:absolute; inset:0; pointer-events:none; opacity:.16;
@@ -405,7 +408,7 @@ td .org{font-style:italic;font-weight:500}
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:640px){
   main{padding:18px 13px 70px}
-  .banner{padding:20px 15px 18px}
+  .banner{padding:20px 15px 18px;padding-top:calc(20px + env(safe-area-inset-top))}
   .banner-inner{gap:12px}
   .logo-box{width:46px;height:46px;border-radius:13px;font-size:9px}
   .months{grid-template-columns:1fr}
@@ -446,6 +449,11 @@ td .org{font-style:italic;font-weight:500}
   position:absolute;top:8px;right:10px;font-size:18px;color:var(--ink-3);line-height:1;padding:2px 5px;border-radius:6px;
 }
 .install-bar .cerrar:hover{background:rgba(0,0,0,.06)}
+/* el atributo hidden debe ganarle a display:flex */
+.install-bar[hidden]{display:none!important}
+/* dentro de la app ya instalada, jamás mostrar el aviso de instalar */
+@media (display-mode: standalone){ .install-bar{display:none!important} }
+@media (display-mode: minimal-ui){ .install-bar{display:none!important} }
 @media (prefers-color-scheme:dark){
   .install-bar{background:rgba(20,16,32,.72);border-color:rgba(255,255,255,.14);
     box-shadow:0 18px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12)}
@@ -2234,14 +2242,24 @@ escuchar();
   var txt = document.getElementById("installTxt");
   var btn = document.getElementById("installBtn");
 
-  var enPie = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  function esStandalone() {
+    return window.matchMedia("(display-mode: standalone)").matches
+        || window.matchMedia("(display-mode: minimal-ui)").matches
+        || navigator.standalone === true
+        || document.referrer.startsWith("android-app://")
+        || new URLSearchParams(location.search).get("src") === "pwa";
+  }
+  var enPie = esStandalone();
   var ua = navigator.userAgent || "";
   var esIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   var esAndroid = /android/i.test(ua);
 
   function ocultado() { try { return localStorage.getItem("pwa_oculto") === "1"; } catch (e) { return false; } }
-  function mostrar() { if (bar) bar.hidden = false; }
-  function ocultar() { if (bar) bar.hidden = true; try { localStorage.setItem("pwa_oculto", "1"); } catch (e) {} }
+  function mostrar() { if (bar && !esStandalone() && !ocultado()) bar.hidden = false; }
+  function ocultar() {
+    if (bar) { bar.hidden = true; bar.style.display = "none"; }
+    try { localStorage.setItem("pwa_oculto", "1"); } catch (e) {}
+  }
 
   // ----- Android / Chrome / Edge: evento nativo de instalación -----
   window.addEventListener("beforeinstallprompt", function (e) {
