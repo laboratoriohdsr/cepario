@@ -1,0 +1,2346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2A1354">
+<title>Cepario · Microbiología HDSR</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cepario">
+<meta name="application-name" content="Cepario">
+
+<!-- Ícono adaptable en la pestaña del navegador (claro / oscuro) -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-light-32.png" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-light-16.png" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-dark-32.png" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-dark-16.png" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-light-48.png">
+<link rel="shortcut icon" href="icons/favicon-light-32.png">
+
+<!-- Ícono de pantalla de inicio en iPhone / iPad -->
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#4C2A85;
+  --brand-deep:#2A1354;
+  --brand-soft:#7B4FC4;
+  --brand-wash:#F3EFFA;
+  --accent:#00B8A9;
+  --ink:#1B1035;
+  --ink-2:#4A4160;
+  --ink-3:#7C7492;
+  --line:#E4E0EE;
+  --line-2:#F0EDF7;
+  --bg:#F7F5FB;
+  --card:#FFFFFF;
+  --verde:#16A34A;
+  --amarillo:#F59E0B;
+  --rojo:#DC2626;
+  --gris:#94A3B8;
+  --r-s:8px; --r-m:14px; --r-l:22px;
+  --sh-1:0 1px 2px rgba(27,16,53,.06), 0 1px 3px rgba(27,16,53,.05);
+  --sh-2:0 4px 14px rgba(27,16,53,.08), 0 1px 3px rgba(27,16,53,.05);
+  --sh-3:0 18px 50px rgba(27,16,53,.20);
+  --display:'Bricolage Grotesque', system-ui, sans-serif;
+  --body:'Inter', system-ui, -apple-system, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--body); background:var(--bg); color:var(--ink);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:var(--brand);text-decoration:none}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- BANNER ---------- */
+.banner{
+  background:
+    radial-gradient(circle at 12% 120%, rgba(0,184,169,.30), transparent 45%),
+    radial-gradient(circle at 88% -30%, rgba(123,79,196,.55), transparent 55%),
+    linear-gradient(115deg, var(--brand-deep) 0%, #43217A 55%, #5B2E9D 100%);
+  color:#fff; position:relative; overflow:hidden;
+  padding:26px 20px 22px; padding-top:calc(26px + env(safe-area-inset-top));
+}
+.banner::after{ /* placa de agar: colonias */
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.16;
+  background-image:
+    radial-gradient(circle, #fff 1.6px, transparent 1.9px),
+    radial-gradient(circle, #fff 1px, transparent 1.3px);
+  background-size:38px 38px, 23px 23px;
+  background-position:0 0, 14px 11px;
+  mask-image:linear-gradient(100deg, transparent 42%, #000 100%);
+  -webkit-mask-image:linear-gradient(100deg, transparent 42%, #000 100%);
+}
+.banner-inner{max-width:1400px;margin:0 auto;display:flex;align-items:flex-start;gap:20px;position:relative;z-index:2}
+.banner h1{
+  font-family:var(--display); font-weight:800; font-size:clamp(21px,3.4vw,34px);
+  line-height:1.08; letter-spacing:-.02em;
+}
+.banner .sub{font-size:13.5px;opacity:.78;margin-top:5px;font-weight:400;max-width:60ch}
+.banner .eyebrow{
+  font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+  opacity:.62; margin-bottom:8px; display:block;
+}
+.banner-side{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0}
+.logo-box{
+  width:62px;height:62px;border-radius:16px;
+  display:grid;place-items:center;overflow:hidden;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.logo-box picture,.logo-box img{width:100%;height:100%;display:block;object-fit:contain}
+.logo-box img{width:100%;height:100%;object-fit:contain}
+.sync{
+  display:flex;align-items:center;gap:7px;font-size:11.5px;font-family:var(--mono);
+  background:rgba(255,255,255,.13);padding:5px 11px;border-radius:99px;white-space:nowrap;
+}
+.sync .dot{width:7px;height:7px;border-radius:99px;background:var(--verde);box-shadow:0 0 0 3px rgba(22,163,74,.28)}
+.sync.off .dot{background:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.28)}
+.sync.err .dot{background:#F87171;box-shadow:0 0 0 3px rgba(248,113,113,.28)}
+
+/* ---------- TABS ---------- */
+.tabs{
+  background:var(--brand-deep); position:sticky; top:0; z-index:60;
+  box-shadow:0 2px 12px rgba(27,16,53,.18);
+}
+.tabs-inner{max-width:1400px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:0 12px}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab{
+  color:rgba(255,255,255,.62); padding:13px 17px; font-size:13.5px; font-weight:600;
+  white-space:nowrap; border-bottom:3px solid transparent; display:flex; align-items:center; gap:7px;
+  transition:color .15s, background .15s;
+}
+.tab:hover{color:#fff;background:rgba(255,255,255,.06)}
+.tab.on{color:#fff;border-bottom-color:var(--accent);background:rgba(255,255,255,.09)}
+.tab .badge{
+  background:var(--rojo);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;
+  min-width:18px;height:18px;border-radius:99px;display:grid;place-items:center;padding:0 5px;
+}
+
+/* ---------- LAYOUT ---------- */
+main{max-width:1400px;margin:0 auto;padding:24px 20px 80px}
+.view{display:none;animation:fade .28s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sec-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.sec-head h2{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:-.015em}
+.sec-head p{color:var(--ink-3);font-size:13px;margin-top:2px}
+.sec-head .spacer{margin-left:auto}
+.rowbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* ---------- BOTONES ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:10px;
+  font-size:13.5px;font-weight:600;background:var(--card);border:1px solid var(--line);
+  color:var(--ink-2);box-shadow:var(--sh-1);transition:.14s;
+}
+.btn:hover{border-color:var(--brand-soft);color:var(--brand);transform:translateY(-1px)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-deep);color:#fff}
+.btn.ghost{background:transparent;box-shadow:none;border-color:transparent}
+.btn.ghost:hover{background:var(--brand-wash)}
+.btn.danger{color:var(--rojo);border-color:#F5C9C9}
+.btn.danger:hover{background:#FEF2F2;border-color:var(--rojo);color:var(--rojo)}
+.btn.sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ---------- CARDS / KPI ---------- */
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(168px,1fr))}
+.kpi{
+  background:var(--card);border-radius:var(--r-m);padding:16px 17px;border:1px solid var(--line);
+  box-shadow:var(--sh-1);position:relative;overflow:hidden;
+}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand-soft)}
+.kpi.v::before{background:var(--verde)} .kpi.a::before{background:var(--amarillo)}
+.kpi.r::before{background:var(--rojo)}  .kpi.t::before{background:var(--accent)}
+.kpi .lbl{font-size:11px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.kpi .val{font-family:var(--display);font-size:31px;font-weight:800;line-height:1.05;margin-top:7px;letter-spacing:-.02em}
+.kpi .sub{font-size:11.5px;color:var(--ink-3);margin-top:3px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-m);box-shadow:var(--sh-1);overflow:hidden}
+.panel-h{padding:14px 17px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:10px}
+.panel-h h3{font-family:var(--display);font-size:15.5px;font-weight:700}
+.panel-h .spacer{margin-left:auto}
+.panel-b{padding:16px 17px}
+
+/* ---------- CEPARIO: años y meses ---------- */
+.year-rule{display:flex;align-items:center;gap:16px;margin:34px 0 20px}
+.year-rule:first-child{margin-top:6px}
+.year-rule hr{flex:1;border:none;border-top:2px dashed #C9C2DC}
+.year-rule .y{
+  font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ink-2);letter-spacing:.06em;
+}
+.year-rule .n{font-size:11.5px;color:var(--ink-3);font-family:var(--mono)}
+.months{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(272px,1fr))}
+.mcard{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh-1);overflow:hidden;transition:.16s;cursor:pointer;position:relative;
+  display:flex;flex-direction:column;
+}
+.mcard:hover{transform:translateY(-3px);box-shadow:var(--sh-2);border-color:var(--brand-soft)}
+.mcard .mtop{padding:13px 16px 11px;display:flex;align-items:center;gap:9px}
+.mcard .mname{font-family:var(--display);font-size:16.5px;font-weight:700;text-transform:capitalize;letter-spacing:-.01em}
+.mcard .mtag{
+  margin-left:auto;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;padding:3px 8px;border-radius:99px;color:#fff;
+}
+.mcard .mbar{height:4px}
+.mcard .mbody{display:grid;grid-template-columns:1fr 1px 1fr;flex:1}
+.mcard .mcol{padding:12px 14px 14px;min-height:104px}
+.mcard .mdiv{background:var(--line-2)}
+.mcard .ctitle{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);display:flex;align-items:center;gap:5px;
+}
+.mcard .cnum{font-family:var(--display);font-size:26px;font-weight:800;line-height:1;margin:6px 0 8px;letter-spacing:-.02em}
+.vials{display:flex;flex-wrap:wrap;gap:3.5px}
+.vial{width:8px;height:8px;border-radius:2.5px;background:var(--gris);opacity:.9}
+.vial.act{background:var(--brand-soft)}
+.vial.atc{background:var(--accent)}
+.vial.off{background:#D8D3E4}
+.vials .more{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);margin-left:2px}
+.mcard .mfoot{
+  padding:8px 14px;border-top:1px solid var(--line-2);font-size:11px;color:var(--ink-3);
+  display:flex;align-items:center;gap:8px;font-family:var(--mono);
+}
+.mcard .mfoot .del{margin-left:auto;opacity:0;transition:.15s;color:var(--ink-3);padding:2px 6px;border-radius:6px}
+.mcard:hover .mfoot .del{opacity:1}
+.mcard .mfoot .del:hover{background:#FEF2F2;color:var(--rojo)}
+.mcard.empty{border-style:dashed;box-shadow:none;background:transparent}
+
+/* ---------- TABLA ---------- */
+.twrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+th{
+  text-align:left;padding:10px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);border-bottom:1.5px solid var(--line);
+  background:var(--brand-wash);position:sticky;top:0;white-space:nowrap;
+}
+td{padding:11px 12px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--brand-wash)}
+td .code{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--brand)}
+td .org{font-style:italic;font-weight:500}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;
+  font-size:11px;font-weight:600;background:var(--line-2);color:var(--ink-2);white-space:nowrap;
+}
+.pill.v{background:#DCFCE7;color:#15803D} .pill.a{background:#FEF3C7;color:#B45309}
+.pill.r{background:#FEE2E2;color:#B91C1C} .pill.g{background:#F1F5F9;color:#64748B}
+.pill.b{background:#E9E3F8;color:#5B2E9D} .pill.t{background:#CCF5F1;color:#0F766E}
+.pill.tiny{font-size:10px;padding:2px 7px}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+
+/* ---------- FILTROS ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.seg{display:flex;background:var(--line-2);border-radius:10px;padding:3px;gap:2px}
+.seg button{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink-3)}
+.seg button.on{background:var(--card);color:var(--brand);box-shadow:var(--sh-1)}
+.inp,select.inp{
+  padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);
+  font-size:13.5px;min-width:0;box-shadow:var(--sh-1);
+}
+.inp:focus{border-color:var(--brand-soft);outline:none;box-shadow:0 0 0 3px rgba(123,79,196,.14)}
+.search{flex:1;min-width:180px;max-width:340px}
+
+/* ---------- FORMULARIO / MODAL ---------- */
+.ovl{
+  position:fixed;inset:0;background:rgba(27,16,53,.55);backdrop-filter:blur(4px);z-index:200;
+  display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;
+  animation:fade .18s ease;
+}
+.modal{
+  background:var(--bg);border-radius:20px;box-shadow:var(--sh-3);width:100%;max-width:860px;
+  overflow:hidden;margin:auto 0;animation:pop .22s cubic-bezier(.2,.9,.3,1.1);
+}
+.modal.wide{max-width:1120px}
+.modal.narrow{max-width:460px}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.mhead{
+  background:linear-gradient(115deg,var(--brand-deep),#5B2E9D);color:#fff;padding:17px 22px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:3;
+}
+.mhead h3{font-family:var(--display);font-size:17px;font-weight:700}
+.mhead .msub{font-size:12px;opacity:.72;margin-top:2px}
+.mhead .x{margin-left:auto;color:#fff;font-size:24px;line-height:1;padding:0 6px;opacity:.8}
+.mhead .x:hover{opacity:1}
+.mbody{padding:20px 22px;max-height:calc(100vh - 210px);overflow-y:auto}
+.mfoot2{
+  padding:14px 22px;background:var(--card);border-top:1px solid var(--line);
+  display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;position:sticky;bottom:0;
+}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+.fgrid.two{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.f{display:flex;flex-direction:column;gap:5px}
+.f.full{grid-column:1/-1}
+.f label{font-size:11.5px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;gap:5px}
+.f label .req{color:var(--rojo)}
+.f input,.f select,.f textarea{
+  padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:14px;
+}
+.f input:focus,.f select:focus,.f textarea:focus{
+  border-color:var(--brand-soft);outline:none;box-shadow:0 0 0 3px rgba(123,79,196,.14)
+}
+.f textarea{resize:vertical;min-height:66px;font-family:inherit}
+.f .hint{font-size:11px;color:var(--ink-3)}
+.fset{
+  border:1px solid var(--line);border-radius:var(--r-m);padding:16px;background:var(--card);margin-bottom:14px;
+}
+.fset > legend{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--brand);padding:0 8px;font-weight:700;
+}
+.multi{display:flex;flex-wrap:wrap;gap:6px}
+.multi label{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--line);
+  border-radius:99px;font-size:12.5px;cursor:pointer;background:var(--card);transition:.12s;user-select:none;
+}
+.multi label:hover{border-color:var(--brand-soft)}
+.multi input{display:none}
+.multi input:checked + span{color:var(--brand);font-weight:600}
+.multi label:has(input:checked){background:var(--brand-wash);border-color:var(--brand-soft)}
+.sw{display:flex;align-items:center;gap:10px;padding:9px 0}
+.sw input{width:0;height:0;opacity:0;position:absolute}
+.sw .track{
+  width:42px;height:24px;border-radius:99px;background:#D8D3E4;position:relative;transition:.18s;flex-shrink:0;cursor:pointer;
+}
+.sw .track::after{
+  content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:99px;
+  background:#fff;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.sw input:checked + .track{background:var(--brand)}
+.sw input:checked + .track::after{transform:translateX(18px)}
+.sw .txt{font-size:13.5px}
+
+/* antibiograma */
+.abg{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:7px}
+.ab{display:flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+.ab .n{font-family:var(--mono);font-size:11px;flex:1;color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis}
+.ab .opts{display:flex;gap:2px}
+.ab .opts button{
+  width:24px;height:24px;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--ink-3);background:var(--line-2);
+}
+.ab .opts button.on[data-v="S"]{background:var(--verde);color:#fff}
+.ab .opts button.on[data-v="I"]{background:var(--amarillo);color:#fff}
+.ab .opts button.on[data-v="R"]{background:var(--rojo);color:#fff}
+
+/* ---------- ALERTAS / LISTAS ---------- */
+.alist{display:flex;flex-direction:column}
+.al{display:flex;align-items:center;gap:12px;padding:11px 17px;border-bottom:1px solid var(--line-2);font-size:13px}
+.al:last-child{border-bottom:none}
+.al .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:15px}
+.al .ico.r{background:#FEE2E2} .al .ico.a{background:#FEF3C7} .al .ico.b{background:var(--brand-wash)}
+.al .tx{flex:1;min-width:0}
+.al .tx b{font-weight:600}
+.al .tx .m{color:var(--ink-3);font-size:11.5px;margin-top:1px}
+.empty-st{padding:40px 20px;text-align:center;color:var(--ink-3)}
+.empty-st .big{font-size:34px;margin-bottom:10px;opacity:.5}
+.empty-st p{font-size:13.5px;margin-bottom:14px}
+
+/* ---------- CHARTS ---------- */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:minmax(90px,168px) 1fr auto;gap:11px;align-items:center;font-size:12.5px}
+.bar-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic}
+.bar-row .track{height:19px;background:var(--line-2);border-radius:5px;overflow:hidden}
+.bar-row .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--brand),var(--brand-soft));transition:width .5s ease}
+.bar-row .vl{font-family:var(--mono);font-size:12px;font-weight:600;min-width:34px;text-align:right}
+.donut-wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.legend{display:flex;flex-direction:column;gap:7px;font-size:12.5px;flex:1;min-width:150px}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend .sq{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+.legend .v{margin-left:auto;font-family:var(--mono);font-weight:600}
+.spark{display:flex;align-items:flex-end;gap:5px;height:112px}
+.spark .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.spark .b{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--brand-soft),var(--brand));min-height:3px;transition:height .5s}
+.spark .lb{font-family:var(--mono);font-size:9px;color:var(--ink-3);white-space:nowrap}
+
+/* ---------- TOAST / PIN ---------- */
+#toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:400;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{
+  background:var(--ink);color:#fff;padding:11px 19px;border-radius:12px;font-size:13.5px;
+  box-shadow:var(--sh-3);animation:up .25s ease;max-width:88vw;
+}
+.toast.ok{background:#14532D} .toast.err{background:#7F1D1D} .toast.warn{background:#78350F}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#pinGate{
+  position:fixed;inset:0;z-index:500;display:none;place-items:center;
+  background:linear-gradient(140deg,var(--brand-deep),#5B2E9D);
+}
+#pinGate.on{display:grid}
+.pinbox{background:var(--card);padding:32px 30px;border-radius:20px;text-align:center;box-shadow:var(--sh-3);width:min(330px,90vw)}
+.pinbox h2{font-family:var(--display);font-size:19px;margin-bottom:6px}
+.pinbox p{font-size:13px;color:var(--ink-3);margin-bottom:18px}
+.pinbox input{
+  width:100%;padding:13px;text-align:center;font-family:var(--mono);font-size:24px;letter-spacing:.5em;
+  border:1.5px solid var(--line);border-radius:12px;margin-bottom:14px;text-indent:.5em;
+}
+.loading{display:grid;place-items:center;padding:60px 20px;color:var(--ink-3);font-size:13.5px;gap:14px}
+.spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--brand);border-radius:99px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------- DETALLE ---------- */
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}
+.dl .it{padding:10px 12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px}
+.dl .it .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.dl .it .v{font-size:13.5px;margin-top:3px;font-weight:500;word-break:break-word}
+.tl{border-left:2px solid var(--line);margin-left:6px;padding-left:16px;display:flex;flex-direction:column;gap:14px}
+.tl .ev{position:relative;font-size:12.5px}
+.tl .ev::before{content:'';position:absolute;left:-22px;top:5px;width:9px;height:9px;border-radius:99px;background:var(--brand-soft);border:2px solid var(--bg)}
+.tl .ev .d{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:640px){
+  main{padding:18px 13px 70px}
+  .banner{padding:20px 15px 18px}
+  .banner-inner{gap:12px}
+  .logo-box{width:46px;height:46px;border-radius:13px;font-size:9px}
+  .months{grid-template-columns:1fr}
+  .sec-head h2{font-size:20px}
+  .modal{border-radius:16px}
+  .mbody{padding:16px 15px}
+  .mhead{padding:14px 16px}
+  .mfoot2{padding:12px 15px}
+  .mfoot2 .btn{flex:1;justify-content:center}
+  .kpi .val{font-size:26px}
+  .bar-row{grid-template-columns:minmax(74px,110px) 1fr auto}
+  .mcard .mfoot .del{opacity:1}
+}
+
+
+/* ---------- INSTALAR APP (PWA) ---------- */
+.install-bar{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));
+  z-index:350;width:min(440px,calc(100vw - 24px));
+  background:rgba(255,255,255,.72);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.55);border-radius:20px;
+  box-shadow:0 18px 50px rgba(27,16,53,.28), inset 0 1px 0 rgba(255,255,255,.6);
+  padding:14px 15px;display:flex;align-items:center;gap:13px;
+  animation:slideUp .35s cubic-bezier(.2,.9,.3,1.1);
+}
+@keyframes slideUp{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
+.install-bar .ic{
+  width:48px;height:48px;border-radius:13px;flex-shrink:0;overflow:hidden;
+  box-shadow:var(--sh-1);background:#fff;display:grid;place-items:center;
+}
+.install-bar .ic img{width:100%;height:100%;object-fit:contain}
+.install-bar .tx{flex:1;min-width:0}
+.install-bar .tx b{font-family:var(--display);font-size:14.5px;font-weight:700;display:block}
+.install-bar .tx span{font-size:12px;color:var(--ink-2);display:block;margin-top:1px;line-height:1.35}
+.install-bar .acts{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.install-bar .acts .btn{padding:8px 14px;font-size:13px}
+.install-bar .cerrar{
+  position:absolute;top:8px;right:10px;font-size:18px;color:var(--ink-3);line-height:1;padding:2px 5px;border-radius:6px;
+}
+.install-bar .cerrar:hover{background:rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){
+  .install-bar{background:rgba(20,16,32,.72);border-color:rgba(255,255,255,.14);
+    box-shadow:0 18px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12)}
+  .install-bar .tx b{color:#fff}
+  .install-bar .tx span{color:#C9C2DC}
+  .install-bar .ic{background:#0C0C10}
+  .install-bar .cerrar{color:#9A93AE}
+}
+/* Hoja de instrucciones iOS */
+.ios-steps{display:flex;flex-direction:column;gap:14px;padding:4px 2px}
+.ios-steps .step{display:flex;gap:12px;align-items:flex-start;font-size:14px}
+.ios-steps .num{
+  width:26px;height:26px;border-radius:99px;background:var(--brand);color:#fff;flex-shrink:0;
+  display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:12.5px;
+}
+.ios-steps .shareico{
+  display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border:1.5px solid var(--brand);border-radius:6px;color:var(--brand);vertical-align:-5px;margin:0 2px;
+}
+
+/* ---------- IMPRESIÓN ---------- */
+@media print{
+  .tabs,.banner-side,.rowbtns,.filters,.btn,.mfoot,#toasts,.install-bar{display:none!important}
+  body{background:#fff;font-size:11px}
+  .banner{background:#fff!important;color:#000;padding:0 0 12px;border-bottom:2px solid #000}
+  .banner::after{display:none}
+  .view{display:none!important}
+  .view.on{display:block!important}
+  .panel,.mcard,.kpi{box-shadow:none;border:1px solid #999;break-inside:avoid}
+  table{min-width:0;font-size:9.5px}
+  th{background:#eee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .months{grid-template-columns:repeat(3,1fr)}
+  @page{margin:12mm;size:landscape}
+}
+</style>
+</head>
+<body>
+
+<div id="pinGate">
+  <div class="pinbox">
+    <h2>Cepario protegido</h2>
+    <p>Ingresa el PIN del laboratorio</p>
+    <input type="password" id="pinInput" inputmode="numeric" maxlength="8" autocomplete="off">
+    <button class="btn primary" style="width:100%;justify-content:center" onclick="checkPin()">Entrar</button>
+  </div>
+</div>
+
+<header class="banner">
+  <div class="banner-inner">
+    <div>
+      <span class="eyebrow" id="bEyebrow">Laboratorio Clínico · Microbiología</span>
+      <h1 id="bTitulo">Cepario de Microbiología</h1>
+      <p class="sub" id="bSub">Hospital Departamental San Rafael de Zarzal</p>
+    </div>
+    <div class="banner-side">
+      <div class="logo-box" id="bLogo">
+        <picture>
+          <source srcset="icons/logo-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="icons/logo-light.png" alt="Logo del cepario">
+        </picture>
+      </div>
+      <div class="sync off" id="syncBadge" onclick="app.diagnostico()"><span class="dot"></span><span id="syncTxt">Conectando…</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-inner" id="tabsBar"></div>
+</nav>
+
+<main>
+  <div class="view on" id="v-inicio"></div>
+  <div class="view" id="v-cepario"></div>
+  <div class="view" id="v-cepas"></div>
+  <div class="view" id="v-qc"></div>
+  <div class="view" id="v-stats"></div>
+  <div class="view" id="v-config"></div>
+</main>
+
+<div class="install-bar" id="installBar" hidden>
+  <button class="cerrar" onclick="pwa.ocultar()" aria-label="Cerrar">×</button>
+  <div class="ic"><img src="icons/icon-192.png" alt=""></div>
+  <div class="tx">
+    <b>Instala el Cepario</b>
+    <span id="installTxt">Ábrelo desde la pantalla de inicio, sin conexión y a pantalla completa.</span>
+  </div>
+  <div class="acts">
+    <button class="btn primary" id="installBtn" onclick="pwa.instalar()">Instalar</button>
+  </div>
+</div>
+
+<div id="modals"></div>
+<div id="toasts"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ══════════════════════════════════════════════════════════════
+   1. FIREBASE
+   ══════════════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCcv4EbF0Ox4SSb1Ozg3Nziz00C5R3GoU8",
+  authDomain: "cepario-hdsrz.firebaseapp.com",
+  projectId: "cepario-hdsrz",
+  storageBucket: "cepario-hdsrz.firebasestorage.app",
+  messagingSenderId: "51077809077",
+  appId: "1:51077809077:web:f0bacf45cd0a54006b4ffc"
+};
+
+let db = null, cloudOK = false;
+try { db = getFirestore(initializeApp(firebaseConfig)); }
+catch (e) { console.warn("Firebase no disponible:", e); }
+
+/* ══════════════════════════════════════════════════════════════
+   2. CATÁLOGOS Y CONFIGURACIÓN POR DEFECTO
+   ══════════════════════════════════════════════════════════════ */
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+const CAT = {
+  microorganismos: [
+    "Escherichia coli","Klebsiella pneumoniae","Klebsiella oxytoca","Klebsiella aerogenes",
+    "Enterobacter cloacae complex","Serratia marcescens","Proteus mirabilis","Morganella morganii",
+    "Citrobacter freundii","Providencia spp.","Salmonella spp.","Shigella spp.",
+    "Pseudomonas aeruginosa","Acinetobacter baumannii complex","Stenotrophomonas maltophilia",
+    "Burkholderia cepacia complex","Staphylococcus aureus","Staphylococcus epidermidis",
+    "Staphylococcus haemolyticus","Staphylococcus saprophyticus","Enterococcus faecalis",
+    "Enterococcus faecium","Streptococcus pneumoniae","Streptococcus agalactiae",
+    "Streptococcus pyogenes","Haemophilus influenzae","Neisseria meningitidis",
+    "Neisseria gonorrhoeae","Campylobacter spp.","Listeria monocytogenes","Bacillus subtilis",
+    "Candida albicans","Candida tropicalis","Candida glabrata","Candida parapsilosis",
+    "Candida auris","Cryptococcus neoformans","Aspergillus spp.","Otro"
+  ],
+  tiposMuestra: [
+    "Hemocultivo","Urocultivo","Secreción de herida","Absceso","Líquido cefalorraquídeo",
+    "Líquido pleural","Líquido ascítico","Líquido articular","Esputo","Aspirado traqueal",
+    "Lavado broncoalveolar","Coprocultivo","Punta de catéter","Secreción faríngea",
+    "Secreción ótica","Secreción ocular","Secreción vaginal / endocervical","Tejido / biopsia",
+    "Hisopado rectal (tamizaje)","Hisopado nasal (tamizaje)","Otro"
+  ],
+  servicios: [
+    "UCI Adultos","UCI Neonatal","UCI Pediátrica","Hospitalización Adultos",
+    "Hospitalización Pediatría","Urgencias","Cirugía","Ginecobstetricia","Sala de Partos",
+    "Consulta Externa","Ambulatorio","Otro"
+  ],
+  perfiles: [
+    "Sin mecanismo destacable","BLEE","AmpC","Carbapenemasa KPC","Carbapenemasa NDM",
+    "Carbapenemasa OXA-48","Carbapenemasa VIM/IMP","Resistente a carbapenémicos (fenotipo)",
+    "MRSA (S. aureus meticilino-resistente)","Estafilococo coagulasa negativo meticilino-resistente",
+    "VRE (Enterococo vancomicino-resistente)","Resistente a linezolid","Resistente a colistina (mcr)",
+    "Resistente a ceftazidima-avibactam","MDR","XDR","PDR","Otro"
+  ],
+  medios: [
+    "Leche descremada 10 % (−70 °C)","Caldo BHI + glicerol 15-20 % (−70 °C)",
+    "Caldo BHI + glicerol 15-20 % (−20 °C)","Caldo tripticasa soya + glicerol (−70 °C)",
+    "Perlas criogénicas (Microbank / Cryobank)","Agar nutritivo inclinado (T° ambiente)",
+    "Agar semisólido con aceite mineral","Agua destilada estéril (método Castellani)",
+    "Liofilizado","Otro"
+  ],
+  equipos: ["Congelador −70 °C","Congelador −20 °C","Nevera 2-8 °C","Estante T° ambiente","Otro"],
+  motivos: [
+    "Vigilancia epidemiológica (IAAS)","Brote / caso agrupado","Perfil inusual de resistencia",
+    "Envío a LDSP / INS","Control de calidad interno","Verificación de medios de cultivo",
+    "Control de antibiograma (CLSI)","Docencia / entrenamiento","Prueba de aptitud (PEEC / PICCAP)",
+    "Investigación","Solicitud médica","Otro"
+  ],
+  estados: ["Activa","Subcultivada","Enviada a referencia","Agotada","Contaminada","No viable","Descartada"],
+  bsl: ["BSL-1","BSL-2","BSL-3"],
+  identificacion: ["Manual / bioquímica convencional","Sistema automatizado (VITEK 2)","Sistema automatizado (Phoenix)","Sistema automatizado (MicroScan)","MALDI-TOF","Pruebas rápidas / aglutinación","Otro"],
+  proveedores: ["ATCC (directo)","Microbiologics","Liofilchem","Oxoid / Thermo","BD","bioMérieux","Kwik-Stik","Donación de laboratorio de referencia","INS","Otro"],
+  antibioticos: [
+    "Ampicilina","Amp/Sulbactam","Amox/Clavulanato","Pip/Tazobactam","Cefazolina","Cefuroxima",
+    "Cefotaxima","Ceftriaxona","Ceftazidima","Cefepime","Ceftazidima-avibactam","Ertapenem",
+    "Imipenem","Meropenem","Amikacina","Gentamicina","Ciprofloxacina","Levofloxacina",
+    "Trimetoprim/Sulfa","Nitrofurantoína","Colistina","Tigeciclina","Vancomicina","Oxacilina",
+    "Clindamicina","Eritromicina","Linezolid","Daptomicina","Penicilina","Fluconazol","Anfotericina B"
+  ],
+  conservacion: ["Cepa de referencia","Cepa de reserva (stock)","Cepa de trabajo"]
+};
+
+const DEFAULT_CFG = {
+  titulo: "Cepario de Microbiología",
+  subtitulo: "Hospital Departamental San Rafael de Zarzal — Laboratorio Clínico",
+  eyebrow: "Laboratorio Clínico · Microbiología",
+  logoUrl: "",
+  // Semáforo de cepas nativas: por antigüedad en meses
+  natVerde: 3,        // 0–3 meses de antigüedad → verde (los 4 meses más recientes)
+  natAmarillo: 5,     // 4–5 meses → amarillo
+  natRetencion: 6,    // a los 6 meses se puede descartar
+  // Semáforo de cepas ATCC: por número de pase
+  atccPaseMax: 5,
+  atccVerde: 3,
+  atccAmarillo: 4,
+  atccVigenciaDias: 30,   // vigencia del cultivo de trabajo después de un pase
+  atccVigenciaMeses: 24,  // vigencia del vial madre / lote
+  // Colores
+  cVerde: "#16A34A",
+  cAmarillo: "#F59E0B",
+  cRojo: "#DC2626",
+  cMarca: "#4C2A85",
+  criterioMes: "edad",    // "edad" | "peor"
+  diasAviso: 15,
+  pinActivo: false,
+  pin: "",
+  catalogos: {}
+};
+
+/* ══════════════════════════════════════════════════════════════
+   3. ESTADO
+   ══════════════════════════════════════════════════════════════ */
+const state = {
+  cepas: [], meses: [], qc: [],
+  cfg: { ...DEFAULT_CFG },
+  view: "inicio",
+  filtro: { tipo: "todas", q: "", estado: "", mes: "", semaforo: "", org: "" },
+  ready: { cepas: false, meses: false, qc: false, cfg: false }
+};
+
+const LS = "cepario_hdsrz_v1";
+function saveLocal() {
+  try {
+    localStorage.setItem(LS, JSON.stringify({
+      cepas: state.cepas, meses: state.meses, qc: state.qc, cfg: state.cfg
+    }));
+  } catch (e) {}
+}
+function loadLocal() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LS) || "null");
+    if (d) {
+      state.cepas = d.cepas || []; state.meses = d.meses || [];
+      state.qc = d.qc || []; state.cfg = { ...DEFAULT_CFG, ...(d.cfg || {}) };
+    }
+  } catch (e) {}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. UTILIDADES
+   ══════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const fmtISO = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const hoy = () => fmtISO(new Date());
+const mesActual = () => hoy().slice(0, 7);
+
+function mesLabel(id) {
+  if (!id) return "—";
+  const [a, m] = id.split("-");
+  return `${MESES[+m - 1]} ${a}`;
+}
+function mesNombre(id) { return MESES[+id.split("-")[1] - 1] || ""; }
+
+function edadMeses(mesId) {
+  if (!mesId) return 0;
+  const [a, m] = mesId.split("-").map(Number);
+  const [ha, hm] = mesActual().split("-").map(Number);
+  return (ha - a) * 12 + (hm - m);
+}
+function diasEntre(d1, d2) {
+  if (!d1 || !d2) return null;
+  return Math.round((new Date(d2 + "T00:00") - new Date(d1 + "T00:00")) / 86400000);
+}
+function sumarMeses(fecha, n) {
+  const d = new Date(fecha + "T00:00");
+  d.setMonth(d.getMonth() + n);
+  return fmtISO(d);
+}
+function sumarDias(fecha, n) {
+  const d = new Date(fecha + "T00:00");
+  d.setDate(d.getDate() + n);
+  return fmtISO(d);
+}
+function fFecha(f) {
+  if (!f) return "—";
+  const [a, m, d] = f.split("-");
+  return `${d}/${m}/${a}`;
+}
+function cat(k) {
+  const c = state.cfg.catalogos || {};
+  return (c[k] && c[k].length) ? c[k] : CAT[k];
+}
+
+/* ---- Semáforo ---- */
+function semaforoNativa(cepa) {
+  if (["Descartada", "No viable", "Contaminada", "Agotada"].includes(cepa.estado)) return "gris";
+  const e = edadMeses(cepa.mesId);
+  const c = state.cfg;
+  if (e <= c.natVerde) return "verde";
+  if (e <= c.natAmarillo) return "amarillo";
+  return "rojo";
+}
+function semaforoATCC(cepa) {
+  if (["Descartada", "No viable", "Contaminada", "Agotada"].includes(cepa.estado)) return "gris";
+  const c = state.cfg;
+  const p = Number(cepa.pase || 0);
+  let s = p <= c.atccVerde ? "verde" : (p <= c.atccAmarillo ? "amarillo" : "rojo");
+  // el vencimiento del cultivo de trabajo también puede degradar el color
+  if (cepa.fechaVence) {
+    const d = diasEntre(hoy(), cepa.fechaVence);
+    if (d !== null) {
+      if (d < 0) s = "rojo";
+      else if (d <= c.diasAviso && s === "verde") s = "amarillo";
+    }
+  }
+  return s;
+}
+function semaforo(cepa) { return cepa.tipo === "atcc" ? semaforoATCC(cepa) : semaforoNativa(cepa); }
+function semaforoMes(mesId) {
+  const c = state.cfg;
+  if (c.criterioMes === "peor") {
+    const cs = cepasDeMes(mesId).filter(x => semaforo(x) !== "gris");
+    if (!cs.length) return "gris";
+    const ss = cs.map(semaforo);
+    if (ss.includes("rojo")) return "rojo";
+    if (ss.includes("amarillo")) return "amarillo";
+    return "verde";
+  }
+  const e = edadMeses(mesId);
+  if (e <= c.natVerde) return "verde";
+  if (e <= c.natAmarillo) return "amarillo";
+  return "rojo";
+}
+function colorSem(s) {
+  const c = state.cfg;
+  return { verde: c.cVerde, amarillo: c.cAmarillo, rojo: c.cRojo, gris: "#94A3B8" }[s] || "#94A3B8";
+}
+function claseSem(s) { return { verde: "v", amarillo: "a", rojo: "r", gris: "g" }[s] || "g"; }
+function textoSem(s, tipo) {
+  if (s === "gris") return "inactiva";
+  if (tipo === "atcc") return { verde: "pase ok", amarillo: "revisar", rojo: "pase límite" }[s];
+  return { verde: "vigente", amarillo: "por vencer", rojo: "vencida" }[s];
+}
+
+function cepasDeMes(mesId) { return state.cepas.filter(c => c.mesId === mesId); }
+
+function vencimientoNativa(cepa) {
+  if (!cepa.fechaIngreso) return null;
+  return sumarMeses(cepa.fechaIngreso, state.cfg.natRetencion);
+}
+
+/* ---- Toast ---- */
+function toast(msg, tipo = "") {
+  const el = document.createElement("div");
+  el.className = "toast " + tipo;
+  el.textContent = msg;
+  $("#toasts").appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transition = ".3s"; setTimeout(() => el.remove(), 320); }, 2800);
+}
+function setSync(estado, txt) {
+  const b = $("#syncBadge");
+  b.style.cursor = "pointer";
+  b.title = "Ver diagnóstico de conexión";
+  b.className = "sync " + estado;
+  $("#syncTxt").textContent = txt;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. CAPA DE DATOS
+   ══════════════════════════════════════════════════════════════ */
+async function guardar(col, obj) {
+  obj.actualizado = new Date().toISOString();
+  const arr = state[col];
+  const i = arr.findIndex(x => x.id === obj.id);
+  if (i >= 0) arr[i] = obj; else arr.push(obj);
+  saveLocal(); render();
+  if (db) {
+    try { await setDoc(doc(db, col, obj.id), obj); }
+    catch (e) { console.error(e); toast("Guardado local: sin conexión a la nube", "warn"); }
+  }
+}
+async function borrar(col, id) {
+  state[col] = state[col].filter(x => x.id !== id);
+  saveLocal(); render();
+  if (db) { try { await deleteDoc(doc(db, col, id)); } catch (e) { console.error(e); } }
+}
+async function guardarCfg() {
+  state.cfg.id = "general";
+  saveLocal(); aplicarMarca(); render();
+  if (db) { try { await setDoc(doc(db, "config", "general"), state.cfg); } catch (e) { console.error(e); } }
+}
+
+let ultimoError = null;
+
+const DIAG = {
+  "permission-denied": {
+    t: "Las reglas de Firestore están rechazando la conexión",
+    q: "La base de datos existe y responde, pero las reglas dicen que no.",
+    pasos: [
+      "Firebase → Firestore Database → pestaña <b>Reglas</b>.",
+      "Borra <b>todo</b> lo que haya y pega el bloque completo de abajo (incluida la línea <code>rules_version</code>).",
+      "Pulsa el botón azul <b>Publicar</b>. Si sigue en gris «Publicar», el cambio no se guardó.",
+      "Espera ~1 minuto y recarga esta página con Ctrl+F5 (o Cmd+Shift+R)."
+    ]
+  },
+  "not-found": {
+    t: "La base de datos Firestore todavía no existe",
+    q: "Cambiar las reglas no crea la base de datos: hay que crearla primero.",
+    pasos: [
+      "Firebase → menú lateral <b>Compilación → Firestore Database</b>.",
+      "Pulsa <b>Crear base de datos</b>.",
+      "Elige el modo y la ubicación (por ejemplo <code>southamerica-east1</code>). La ubicación no se puede cambiar después.",
+      "Cuando termine, vuelve a Reglas, pega el bloque de abajo y publica."
+    ]
+  },
+  "failed-precondition": {
+    t: "La base de datos está en modo Datastore, no en modo nativo",
+    q: "Firestore tiene dos modos y el SDK web sólo funciona con el modo nativo.",
+    pasos: [
+      "En la consola de Google Cloud → Firestore, revisa el modo de la base.",
+      "Si dice <b>Datastore</b>, crea una base nueva en modo <b>Nativo</b> (o elimina la actual y créala desde Firebase).",
+      "Desde Firebase → Firestore Database siempre se crea en modo nativo."
+    ]
+  },
+  "unavailable": {
+    t: "El navegador no logra alcanzar los servidores de Google",
+    q: "No es problema de reglas: la petición ni siquiera llega.",
+    pasos: [
+      "Prueba desde datos móviles para descartar la red del hospital.",
+      "Revisa si tu DNS o antivirus bloquea <code>firestore.googleapis.com</code>.",
+      "Desactiva extensiones de bloqueo de anuncios en esta página.",
+      "Si estás abriendo el archivo con doble clic (<code>file://</code>), súbelo a GitHub Pages: Firestore necesita http/https."
+    ]
+  },
+  "unauthenticated": {
+    t: "Las reglas exigen un usuario autenticado",
+    q: "Tus reglas tienen <code>request.auth != null</code> y la app aún no inicia sesión.",
+    pasos: [
+      "Usa por ahora el bloque de reglas abierto de abajo, y protege con el PIN.",
+      "Cuando quieras cerrar de verdad, avísame y montamos autenticación anónima."
+    ]
+  },
+  "invalid-argument": {
+    t: "El identificador del proyecto no coincide",
+    q: "El <code>projectId</code> del código no corresponde a un proyecto válido.",
+    pasos: [
+      "Firebase → ⚙ Configuración del proyecto → Tus apps → configuración del SDK.",
+      "Compara el bloque <code>firebaseConfig</code> con el que está en el HTML."
+    ]
+  }
+};
+
+const REGLAS = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}`;
+
+async function probarConexion() {
+  if (!db) return { code: "sin-sdk", msg: "No se pudo inicializar el SDK de Firebase." };
+  try { await getDocs(collection(db, "cepas")); return null; }
+  catch (e) { return { code: e.code || "desconocido", msg: e.message || String(e) }; }
+}
+
+async function diagnostico() {
+  const cuerpo = id => document.querySelector("#diagBody");
+  abrirModal(`
+    <div class="mhead"><div><h3>Diagnóstico de conexión</h3>
+      <div class="msub">Proyecto <code style="font-family:var(--mono)">cepario-hdsrz</code></div></div>
+      <button class="x" onclick="app.cerrar()">×</button></div>
+    <div class="mbody" id="diagBody"><div class="loading"><div class="spin"></div>Probando la conexión…</div></div>
+    <div class="mfoot2">
+      <button class="btn" onclick="app.copiarReglas()">Copiar las reglas</button>
+      <button class="btn" onclick="app.cerrar();app.diagnostico()">Volver a probar</button>
+      <button class="btn primary" onclick="app.cerrar()">Cerrar</button>
+    </div>`, "wide");
+
+  const err = await probarConexion() || (ultimoError ? { code: ultimoError.code, msg: ultimoError.message } : null);
+  const b = cuerpo();
+  if (!b) return;
+
+  if (!err) {
+    b.innerHTML = `<div class="empty-st"><div class="big" style="color:var(--verde)">✓</div>
+      <p><b>Conexión correcta.</b> Firestore responde y las reglas permiten leer y escribir.</p>
+      <p style="font-size:12.5px">Si el aviso sigue arriba, recarga la página con Ctrl+F5.</p></div>`;
+    setSync("", "En vivo"); cloudOK = true;
+    return;
+  }
+
+  const d = DIAG[err.code] || {
+    t: "Error no reconocido",
+    q: "Copia el código de abajo y lo revisamos.",
+    pasos: ["Abre la consola del navegador (F12 → Consola) y busca líneas en rojo que empiecen por <code>FirebaseError</code>."]
+  };
+
+  b.innerHTML = `
+    <fieldset class="fset"><legend>Qué está pasando</legend>
+      <p style="font-size:15px;font-weight:600;margin-bottom:6px">${d.t}</p>
+      <p style="font-size:13.5px;color:var(--ink-2)">${d.q}</p>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span class="pill r">código: ${esc(err.code)}</span>
+      </div>
+      <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:10px;word-break:break-word">${esc(err.msg)}</p>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Cómo se arregla</legend>
+      <ol style="padding-left:20px;display:flex;flex-direction:column;gap:9px;font-size:13.5px">
+        ${d.pasos.map(p => `<li>${p}</li>`).join("")}
+      </ol>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Reglas que debe tener Firestore</legend>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:9px">
+        Reemplaza <b>todo</b> el contenido del editor de reglas por esto. No lo pegues dentro de las llaves que ya estaban.</p>
+      <pre style="font-family:var(--mono);font-size:12px;background:var(--ink);color:#E9E3F8;padding:14px;border-radius:10px;overflow-x:auto;line-height:1.55">${esc(REGLAS)}</pre>
+      <p style="font-size:12px;color:var(--ink-3);margin-top:9px">
+        Estas reglas dejan la base abierta a cualquiera que conozca la URL. Sirven para arrancar; activa el PIN en Configuración mientras tanto.</p>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Mientras tanto</legend>
+      <p style="font-size:13.5px">La app <b>sigue funcionando</b> guardando en este dispositivo. Cuando la conexión se restablezca, lo que registres aquí no se sube solo: usa
+      <b>Configuración → Descargar respaldo</b> antes de limpiar datos del navegador.</p>
+    </fieldset>`;
+}
+
+function copiarReglas() {
+  navigator.clipboard?.writeText(REGLAS)
+    .then(() => toast("Reglas copiadas al portapapeles", "ok"))
+    .catch(() => toast("No se pudo copiar; selecciona el texto manualmente", "warn"));
+}
+
+function escuchar() {
+  if (!db) { setSync("err", "Solo local"); return; }
+  setSync("off", "Conectando…");
+  const cols = ["cepas", "meses", "qc"];
+  let errores = 0;
+  cols.forEach(c => {
+    onSnapshot(collection(db, c), snap => {
+      state[c] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      state.ready[c] = true;
+      cloudOK = true; setSync("", "En vivo");
+      saveLocal(); asegurarMesActual(); render();
+    }, err => {
+      console.error(c, err); errores++;
+      ultimoError = err;
+      setSync("err", "Sin conexión");
+      if (errores === 1) toast("Toca «Sin conexión» arriba para ver el diagnóstico", "err");
+    });
+  });
+  onSnapshot(doc(db, "config", "general"), d => {
+    if (d.exists()) state.cfg = { ...DEFAULT_CFG, ...d.data() };
+    state.ready.cfg = true;
+    aplicarMarca(); saveLocal(); render();
+  }, err => { ultimoError = err; });
+}
+
+async function asegurarMesActual() {
+  const m = mesActual();
+  if (!state.meses.some(x => x.id === m)) {
+    const nuevo = { id: m, anio: +m.split("-")[0], mes: +m.split("-")[1], auto: true, creado: new Date().toISOString() };
+    state.meses.push(nuevo); saveLocal();
+    if (db) { try { await setDoc(doc(db, "meses", m), nuevo); } catch (e) {} }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. NAVEGACIÓN
+   ══════════════════════════════════════════════════════════════ */
+const TABS = [
+  { id: "inicio",  nom: "Inicio" },
+  { id: "cepario", nom: "Cepario" },
+  { id: "cepas",   nom: "Cepas" },
+  { id: "qc",      nom: "Control de calidad" },
+  { id: "stats",   nom: "Estadísticas" },
+  { id: "config",  nom: "Configuración" }
+];
+
+function ir(v) {
+  state.view = v;
+  document.querySelectorAll(".view").forEach(e => e.classList.toggle("on", e.id === "v-" + v));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  render();
+}
+
+function renderTabs() {
+  const al = alertas().length;
+  $("#tabsBar").innerHTML = TABS.map(t => `
+    <button class="tab ${state.view === t.id ? "on" : ""}" onclick="app.ir('${t.id}')">
+      ${esc(t.nom)}${t.id === "inicio" && al ? `<span class="badge">${al}</span>` : ""}
+    </button>`).join("");
+}
+
+function aplicarMarca() {
+  const c = state.cfg;
+  $("#bTitulo").textContent = c.titulo;
+  $("#bSub").textContent = c.subtitulo;
+  $("#bEyebrow").textContent = c.eyebrow;
+  document.title = c.titulo;
+  if (c.logoUrl) $("#bLogo").innerHTML = `<img src="${esc(c.logoUrl)}" alt="Logo">`;
+  const r = document.documentElement.style;
+  r.setProperty("--verde", c.cVerde); r.setProperty("--amarillo", c.cAmarillo);
+  r.setProperty("--rojo", c.cRojo); r.setProperty("--brand", c.cMarca);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7. ALERTAS
+   ══════════════════════════════════════════════════════════════ */
+function alertas() {
+  const out = [];
+  const c = state.cfg;
+  const activas = state.cepas.filter(x => !["Descartada", "No viable", "Agotada"].includes(x.estado));
+
+  activas.filter(x => x.tipo === "nativa").forEach(x => {
+    const v = vencimientoNativa(x);
+    const d = diasEntre(hoy(), v);
+    if (d === null) return;
+    if (d < 0) out.push({ n: "r", t: `${x.codigo} — ${x.microorganismo}`, m: `Superó los ${c.natRetencion} meses de conservación (venció el ${fFecha(v)}). Evaluar descarte.`, id: x.id });
+    else if (d <= c.diasAviso) out.push({ n: "a", t: `${x.codigo} — ${x.microorganismo}`, m: `Vence en ${d} día${d === 1 ? "" : "s"} (${fFecha(v)}).`, id: x.id });
+  });
+
+  activas.filter(x => x.tipo === "atcc").forEach(x => {
+    if (Number(x.pase) >= c.atccPaseMax)
+      out.push({ n: "r", t: `${x.codigo} — ${x.microorganismo}`, m: `Alcanzó el pase ${x.pase} de ${c.atccPaseMax}. Reconstituir un vial madre nuevo.`, id: x.id });
+    else if (Number(x.pase) === c.atccPaseMax - 1)
+      out.push({ n: "a", t: `${x.codigo} — ${x.microorganismo}`, m: `Va en el pase ${x.pase}. Queda 1 pase disponible.`, id: x.id });
+    if (x.fechaVence) {
+      const d = diasEntre(hoy(), x.fechaVence);
+      if (d !== null && d < 0) out.push({ n: "r", t: `${x.codigo} — cultivo de trabajo`, m: `El cultivo de trabajo venció el ${fFecha(x.fechaVence)}.`, id: x.id });
+    }
+  });
+
+  activas.forEach(x => {
+    const ult = state.qc.filter(q => q.cepaId === x.id).sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""))[0];
+    if (!ult) out.push({ n: "b", t: `${x.codigo} — ${x.microorganismo}`, m: "Sin registro de control de calidad (pureza / viabilidad).", id: x.id });
+    else if (ult.resultado === "No conforme") out.push({ n: "r", t: `${x.codigo} — ${x.microorganismo}`, m: `Último control de calidad no conforme (${fFecha(ult.fecha)}).`, id: x.id });
+  });
+
+  return out.sort((a, b) => ({ r: 0, a: 1, b: 2 }[a.n] - { r: 0, a: 1, b: 2 }[b.n]));
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8. VISTA: INICIO
+   ══════════════════════════════════════════════════════════════ */
+function vInicio() {
+  const cs = state.cepas;
+  const act = cs.filter(x => !["Descartada", "No viable", "Agotada"].includes(x.estado));
+  const nat = act.filter(x => x.tipo === "nativa");
+  const atc = act.filter(x => x.tipo === "atcc");
+  const porSem = s => act.filter(x => semaforo(x) === s).length;
+  const al = alertas();
+
+  const ultimos = [...cs].sort((a, b) => (b.creado || "").localeCompare(a.creado || "")).slice(0, 6);
+
+  // ingresos de los últimos 6 meses
+  const serie = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i);
+    const id = d.toISOString().slice(0, 7);
+    serie.push({ id, n: cs.filter(x => x.mesId === id).length });
+  }
+  const maxS = Math.max(1, ...serie.map(x => x.n));
+
+  $("#v-inicio").innerHTML = `
+    <div class="sec-head">
+      <div>
+        <h2>Estado del cepario</h2>
+        <p>Actualizado al ${fFecha(hoy())} · retención de nativas: ${state.cfg.natRetencion} meses · pase máximo ATCC: ${state.cfg.atccPaseMax}</p>
+      </div>
+      <div class="spacer"></div>
+      <div class="rowbtns">
+        <button class="btn primary" onclick="app.formCepa('nativa')">+ Cepa nativa</button>
+        <button class="btn" onclick="app.formCepa('atcc')">+ Cepa ATCC</button>
+      </div>
+    </div>
+
+    <div class="grid kpis" style="margin-bottom:16px">
+      <div class="kpi"><div class="lbl">En custodia</div><div class="val">${act.length}</div><div class="sub">${nat.length} nativas · ${atc.length} ATCC</div></div>
+      <div class="kpi v"><div class="lbl">Vigentes</div><div class="val">${porSem("verde")}</div><div class="sub">dentro del periodo</div></div>
+      <div class="kpi a"><div class="lbl">Por vencer</div><div class="val">${porSem("amarillo")}</div><div class="sub">requieren revisión</div></div>
+      <div class="kpi r"><div class="lbl">Vencidas</div><div class="val">${porSem("rojo")}</div><div class="sub">evaluar descarte</div></div>
+      <div class="kpi t"><div class="lbl">Descartadas</div><div class="val">${cs.length - act.length}</div><div class="sub">histórico</div></div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start">
+      <div class="panel">
+        <div class="panel-h">
+          <h3>Qué necesita atención</h3>
+          <div class="spacer"></div>
+          <span class="pill ${al.length ? "r" : "v"}">${al.length}</span>
+        </div>
+        ${al.length ? `<div class="alist">${al.slice(0, 12).map(a => `
+          <div class="al" ${a.id ? `onclick="app.detalle('${a.id}')" style="cursor:pointer"` : ""}>
+            <div class="ico ${a.n}">${a.n === "r" ? "!" : a.n === "a" ? "•" : "?"}</div>
+            <div class="tx"><b>${esc(a.t)}</b><div class="m">${esc(a.m)}</div></div>
+          </div>`).join("")}
+          ${al.length > 12 ? `<div class="al"><div class="tx m" style="color:var(--ink-3)">y ${al.length - 12} avisos más…</div></div>` : ""}
+        </div>` : `<div class="empty-st"><div class="big">✓</div><p>Todo al día. Ninguna cepa vencida ni pase en el límite.</p></div>`}
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Ingresos por mes</h3></div>
+        <div class="panel-b">
+          <div class="spark">
+            ${serie.map(s => `<div class="col">
+              <div class="b" style="height:${Math.max(3, (s.n / maxS) * 88)}px" title="${s.n} cepas"></div>
+              <div class="lb">${mesNombre(s.id).slice(0, 3)}</div>
+              <div class="lb" style="color:var(--ink-2);font-weight:600">${s.n}</div>
+            </div>`).join("")}
+          </div>
+        </div>
+        <div class="panel-h" style="border-top:1px solid var(--line-2);border-bottom:none"><h3>Últimos registros</h3></div>
+        <div class="alist">
+          ${ultimos.length ? ultimos.map(c => `
+            <div class="al" onclick="app.detalle('${c.id}')" style="cursor:pointer">
+              <div class="ico b" style="background:${colorSem(semaforo(c))}22;color:${colorSem(semaforo(c))}">${c.tipo === "atcc" ? "R" : "N"}</div>
+              <div class="tx"><b class="org" style="font-style:italic">${esc(c.microorganismo)}</b>
+                <div class="m">${esc(c.codigo)} · ${mesLabel(c.mesId)}</div></div>
+              <span class="pill ${claseSem(semaforo(c))} tiny">${textoSem(semaforo(c), c.tipo)}</span>
+            </div>`).join("")
+          : `<div class="empty-st"><p>Aún no hay cepas registradas.</p><button class="btn primary" onclick="app.formCepa('nativa')">Registrar la primera</button></div>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9. VISTA: CEPARIO (tarjetas por mes)
+   ══════════════════════════════════════════════════════════════ */
+function vCepario() {
+  const ids = [...new Set([...state.meses.map(m => m.id), ...state.cepas.map(c => c.mesId).filter(Boolean)])]
+    .sort().reverse();
+  const anios = [...new Set(ids.map(i => i.split("-")[0]))].sort().reverse();
+
+  let html = `
+    <div class="sec-head">
+      <div>
+        <h2>Cepario por mes</h2>
+        <p>Lo más reciente arriba. Cada tarjeta separa cepas nativas de cepas de referencia ATCC.</p>
+      </div>
+      <div class="spacer"></div>
+      <div class="rowbtns">
+        <span class="pill v tiny">0–${state.cfg.natVerde} meses</span>
+        <span class="pill a tiny">${state.cfg.natVerde + 1}–${state.cfg.natAmarillo} meses</span>
+        <span class="pill r tiny">${state.cfg.natAmarillo + 1}+ meses</span>
+        <button class="btn" onclick="app.formMes()">+ Agregar mes</button>
+        <button class="btn primary" onclick="app.formCepa('nativa')">+ Cepa</button>
+      </div>
+    </div>`;
+
+  if (!ids.length) {
+    html += `<div class="panel"><div class="empty-st"><div class="big">▦</div>
+      <p>El cepario está vacío. El mes actual se crea solo al registrar la primera cepa.</p>
+      <button class="btn primary" onclick="app.formCepa('nativa')">Registrar una cepa</button></div></div>`;
+    $("#v-cepario").innerHTML = html; return;
+  }
+
+  anios.forEach(a => {
+    const delAnio = ids.filter(i => i.startsWith(a));
+    const total = delAnio.reduce((s, i) => s + cepasDeMes(i).length, 0);
+    html += `<div class="year-rule"><hr><span class="y">${a}</span><span class="n">${total} cepas</span><hr></div>
+      <div class="months">${delAnio.map(tarjetaMes).join("")}</div>`;
+  });
+
+  $("#v-cepario").innerHTML = html;
+}
+
+function tarjetaMes(id) {
+  const todas = cepasDeMes(id);
+  const nat = todas.filter(c => c.tipo === "nativa");
+  const atc = todas.filter(c => c.tipo === "atcc");
+  const s = semaforoMes(id);
+  const col = colorSem(s);
+  const e = edadMeses(id);
+  const esActual = id === mesActual();
+
+  const vials = arr => {
+    const max = 28;
+    const v = arr.slice(0, max).map(c => {
+      const sm = semaforo(c);
+      return `<span class="vial" style="background:${colorSem(sm)}" title="${esc(c.codigo)} · ${esc(c.microorganismo)}"></span>`;
+    }).join("");
+    return v + (arr.length > max ? `<span class="more">+${arr.length - max}</span>` : "") ||
+      `<span style="font-size:11px;color:var(--ink-3)">—</span>`;
+  };
+
+  return `<article class="mcard" onclick="app.verMes('${id}')">
+    <div class="mbar" style="background:${col}"></div>
+    <div class="mtop">
+      <span class="mname">${mesNombre(id)}</span>
+      ${esActual ? `<span class="pill b tiny">actual</span>` : ""}
+      <span class="mtag" style="background:${col}">${textoSem(s, "nativa")}</span>
+    </div>
+    <div class="mbody">
+      <div class="mcol">
+        <div class="ctitle">Nativas · paciente</div>
+        <div class="cnum">${nat.length}</div>
+        <div class="vials">${vials(nat)}</div>
+      </div>
+      <div class="mdiv"></div>
+      <div class="mcol">
+        <div class="ctitle">ATCC · referencia</div>
+        <div class="cnum">${atc.length}</div>
+        <div class="vials">${vials(atc)}</div>
+      </div>
+    </div>
+    <div class="mfoot">
+      <span>${e === 0 ? "mes en curso" : `hace ${e} ${e === 1 ? "mes" : "meses"}`}</span>
+      <button class="del" title="Eliminar mes" onclick="event.stopPropagation();app.borrarMes('${id}')">✕</button>
+    </div>
+  </article>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. VISTA: CEPAS (tabla)
+   ══════════════════════════════════════════════════════════════ */
+function cepasFiltradas() {
+  const f = state.filtro;
+  const q = f.q.toLowerCase().trim();
+  return state.cepas.filter(c => {
+    if (f.tipo !== "todas" && c.tipo !== f.tipo) return false;
+    if (f.estado && c.estado !== f.estado) return false;
+    if (f.mes && c.mesId !== f.mes) return false;
+    if (f.org && c.microorganismo !== f.org) return false;
+    if (f.semaforo && semaforo(c) !== f.semaforo) return false;
+    if (q) {
+      const t = [c.codigo, c.microorganismo, c.codigoRef, c.numMuestra, c.tipoMuestra,
+        c.servicio, c.responsable, c.ubicCaja, c.lote, (c.perfiles || []).join(" ")]
+        .join(" ").toLowerCase();
+      if (!t.includes(q)) return false;
+    }
+    return true;
+  }).sort((a, b) => (b.fechaIngreso || "").localeCompare(a.fechaIngreso || "") || (b.codigo || "").localeCompare(a.codigo || ""));
+}
+
+function vCepas() {
+  const f = state.filtro;
+  const lista = cepasFiltradas();
+  const meses = [...new Set(state.cepas.map(c => c.mesId).filter(Boolean))].sort().reverse();
+  const orgs = [...new Set(state.cepas.map(c => c.microorganismo).filter(Boolean))].sort();
+
+  $("#v-cepas").innerHTML = `
+    <div class="sec-head">
+      <div><h2>Listado de cepas</h2><p id="cepasCount">${lista.length} de ${state.cepas.length} registros</p></div>
+      <div class="spacer"></div>
+      <div class="rowbtns">
+        <button class="btn" onclick="app.exportCSV()">Exportar CSV</button>
+        <button class="btn" onclick="window.print()">Imprimir</button>
+        <button class="btn primary" onclick="app.formCepa('${f.tipo === "atcc" ? "atcc" : "nativa"}')">+ Cepa</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="seg">
+        ${[["todas","Todas"],["nativa","Nativas"],["atcc","ATCC"]].map(([v,n]) =>
+          `<button class="${f.tipo === v ? "on" : ""}" onclick="app.setF('tipo','${v}')">${n}</button>`).join("")}
+      </div>
+      <input class="inp search" placeholder="Buscar código, microorganismo, muestra, caja…" value="${esc(f.q)}"
+        oninput="app.setF('q',this.value)">
+      <select class="inp" onchange="app.setF('semaforo',this.value)">
+        <option value="">Semáforo: todos</option>
+        <option value="verde" ${f.semaforo==="verde"?"selected":""}>Vigentes</option>
+        <option value="amarillo" ${f.semaforo==="amarillo"?"selected":""}>Por vencer</option>
+        <option value="rojo" ${f.semaforo==="rojo"?"selected":""}>Vencidas / límite</option>
+        <option value="gris" ${f.semaforo==="gris"?"selected":""}>Inactivas</option>
+      </select>
+      <select class="inp" onchange="app.setF('mes',this.value)">
+        <option value="">Mes: todos</option>
+        ${meses.map(m => `<option value="${m}" ${f.mes===m?"selected":""}>${mesLabel(m)}</option>`).join("")}
+      </select>
+      <select class="inp" onchange="app.setF('org',this.value)">
+        <option value="">Microorganismo: todos</option>
+        ${orgs.map(o => `<option value="${esc(o)}" ${f.org===o?"selected":""}>${esc(o)}</option>`).join("")}
+      </select>
+      <select class="inp" onchange="app.setF('estado',this.value)">
+        <option value="">Estado: todos</option>
+        ${cat("estados").map(o => `<option value="${esc(o)}" ${f.estado===o?"selected":""}>${esc(o)}</option>`).join("")}
+      </select>
+      ${(f.q||f.mes||f.org||f.estado||f.semaforo) ? `<button class="btn ghost sm" onclick="app.limpiarF()">Limpiar filtros</button>` : ""}
+    </div>
+
+    <div class="panel"><div class="twrap">
+      <table>
+        <thead><tr>
+          <th>Código</th><th>Microorganismo</th><th>Tipo</th><th>Origen / referencia</th>
+          <th>Pase</th><th>Ubicación</th><th>Ingreso</th><th>Vence</th><th>Estado</th><th></th>
+        </tr></thead>
+        <tbody id="cepasBody">
+        ${filasCepas(lista)}
+        </tbody>
+      </table>
+    </div></div>`;
+}
+
+function filasCepas(lista) {
+  return lista.length ? lista.map(c => {
+          const s = semaforo(c);
+          const v = c.tipo === "nativa" ? vencimientoNativa(c) : c.fechaVence;
+          return `<tr onclick="app.detalle('${c.id}')" style="cursor:pointer">
+            <td><span class="code">${esc(c.codigo)}</span></td>
+            <td><span class="org">${esc(c.microorganismo)}</span>
+              ${(c.perfiles||[]).length ? `<div class="chips" style="margin-top:4px">${c.perfiles.slice(0,3).map(p=>`<span class="pill r tiny">${esc(p)}</span>`).join("")}${c.perfiles.length>3?`<span class="pill g tiny">+${c.perfiles.length-3}</span>`:""}</div>`:""}</td>
+            <td><span class="pill ${c.tipo==="atcc"?"t":"b"} tiny">${c.tipo==="atcc"?"ATCC":"Nativa"}</span></td>
+            <td style="font-size:12px;color:var(--ink-2)">${esc(c.tipo==="atcc" ? (c.codigoRef||"—") : `${c.tipoMuestra||"—"}${c.servicio?" · "+c.servicio:""}`)}</td>
+            <td>${c.tipo==="atcc" ? `<span class="pill ${claseSem(s)} tiny">${c.pase||0}/${state.cfg.atccPaseMax}</span>` : "—"}</td>
+            <td style="font-size:12px;font-family:var(--mono)">${esc([c.ubicEquipo,c.ubicCaja,c.ubicPos].filter(Boolean).join(" / ")||"—")}</td>
+            <td style="font-family:var(--mono);font-size:12px">${fFecha(c.fechaIngreso)}</td>
+            <td style="font-family:var(--mono);font-size:12px;color:${s==="rojo"?"var(--rojo)":"inherit"}">${fFecha(v)}</td>
+            <td><span class="pill ${claseSem(s)} tiny">${esc(c.estado||"Activa")}</span></td>
+            <td><button class="btn sm ghost" onclick="event.stopPropagation();app.formCepa('${c.tipo}','${c.id}')">Editar</button></td>
+          </tr>`;
+    }).join("")
+  : `<tr><td colspan="10"><div class="empty-st"><div class="big">▤</div><p>No hay cepas que coincidan con el filtro.</p></div></td></tr>`;
+}
+
+function refrescarTabla() {
+  const b = document.querySelector("#cepasBody");
+  if (!b) return vCepas();
+  const l = cepasFiltradas();
+  b.innerHTML = filasCepas(l);
+  const c = document.querySelector("#cepasCount");
+  if (c) c.textContent = `${l.length} de ${state.cepas.length} registros`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   11. VISTA: CONTROL DE CALIDAD
+   ══════════════════════════════════════════════════════════════ */
+function vQC() {
+  const lista = [...state.qc].sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  const conf = lista.filter(q => q.resultado === "Conforme").length;
+  const noconf = lista.filter(q => q.resultado === "No conforme").length;
+  const sinQC = state.cepas.filter(c => !["Descartada","No viable","Agotada"].includes(c.estado) && !state.qc.some(q => q.cepaId === c.id));
+
+  $("#v-qc").innerHTML = `
+    <div class="sec-head">
+      <div><h2>Control de calidad de cepas</h2><p>Verificación de pureza, viabilidad e identidad de la colección</p></div>
+      <div class="spacer"></div>
+      <div class="rowbtns"><button class="btn primary" onclick="app.formQC()">+ Registrar control</button></div>
+    </div>
+
+    <div class="grid kpis" style="margin-bottom:16px">
+      <div class="kpi t"><div class="lbl">Controles</div><div class="val">${lista.length}</div><div class="sub">registrados</div></div>
+      <div class="kpi v"><div class="lbl">Conformes</div><div class="val">${conf}</div><div class="sub">${lista.length ? Math.round(conf/lista.length*100) : 0} %</div></div>
+      <div class="kpi r"><div class="lbl">No conformes</div><div class="val">${noconf}</div><div class="sub">requieren acción</div></div>
+      <div class="kpi a"><div class="lbl">Sin control</div><div class="val">${sinQC.length}</div><div class="sub">cepas activas</div></div>
+    </div>
+
+    <div class="panel"><div class="twrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Cepa</th><th>Microorganismo</th><th>Pureza / Gram</th><th>Viabilidad</th><th>Confirmación</th><th>Resultado</th><th>Analista</th><th></th></tr></thead>
+        <tbody>
+        ${lista.length ? lista.map(q => {
+          const c = state.cepas.find(x => x.id === q.cepaId);
+          return `<tr>
+            <td style="font-family:var(--mono);font-size:12px">${fFecha(q.fecha)}</td>
+            <td><span class="code">${esc(c ? c.codigo : q.codigo || "—")}</span></td>
+            <td><span class="org">${esc(c ? c.microorganismo : "—")}</span></td>
+            <td style="font-size:12px">${esc(q.pureza||"—")}</td>
+            <td style="font-size:12px">${esc(q.viabilidad||"—")}</td>
+            <td style="font-size:12px">${esc(q.confirmacion||"—")}</td>
+            <td><span class="pill ${q.resultado==="Conforme"?"v":"r"} tiny">${esc(q.resultado||"—")}</span></td>
+            <td style="font-size:12px">${esc(q.analista||"—")}</td>
+            <td><button class="btn sm ghost" onclick="app.formQC('${q.id}')">Editar</button>
+                <button class="btn sm ghost" onclick="app.borrarQC('${q.id}')">✕</button></td>
+          </tr>`;
+        }).join("") : `<tr><td colspan="9"><div class="empty-st"><div class="big">◎</div><p>Sin controles de calidad registrados.</p><button class="btn primary" onclick="app.formQC()">Registrar el primero</button></div></td></tr>`}
+        </tbody>
+      </table>
+    </div></div>
+
+    ${sinQC.length ? `<div class="panel" style="margin-top:16px">
+      <div class="panel-h"><h3>Cepas activas sin control de calidad</h3><div class="spacer"></div><span class="pill a">${sinQC.length}</span></div>
+      <div class="alist">${sinQC.slice(0,15).map(c => `
+        <div class="al"><div class="ico a">?</div>
+          <div class="tx"><b class="org" style="font-style:italic">${esc(c.microorganismo)}</b><div class="m">${esc(c.codigo)} · ingresó ${fFecha(c.fechaIngreso)}</div></div>
+          <button class="btn sm" onclick="app.formQC(null,'${c.id}')">Controlar</button></div>`).join("")}
+      </div></div>` : ""}`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   12. VISTA: ESTADÍSTICAS
+   ══════════════════════════════════════════════════════════════ */
+function conteo(arr, key) {
+  const m = {};
+  arr.forEach(x => {
+    const vals = Array.isArray(x[key]) ? x[key] : [x[key]];
+    vals.filter(Boolean).forEach(v => m[v] = (m[v] || 0) + 1);
+  });
+  return Object.entries(m).sort((a, b) => b[1] - a[1]);
+}
+function barras(datos, total, limite = 10) {
+  if (!datos.length) return `<div class="empty-st"><p>Sin datos suficientes.</p></div>`;
+  const max = datos[0][1];
+  return `<div class="bars">${datos.slice(0, limite).map(([n, v]) => `
+    <div class="bar-row">
+      <span class="nm" title="${esc(n)}">${esc(n)}</span>
+      <div class="track"><div class="fill" style="width:${(v / max) * 100}%"></div></div>
+      <span class="vl">${v}${total ? ` <span style="color:var(--ink-3);font-weight:400">(${Math.round(v/total*100)}%)</span>` : ""}</span>
+    </div>`).join("")}</div>`;
+}
+function donut(datos, colores) {
+  const total = datos.reduce((s, d) => s + d[1], 0);
+  if (!total) return `<div class="empty-st"><p>Sin datos.</p></div>`;
+  const R = 54, C = 2 * Math.PI * R;
+  let off = 0;
+  const segs = datos.map(([n, v], i) => {
+    const len = (v / total) * C;
+    const s = `<circle r="${R}" cx="70" cy="70" fill="none" stroke="${colores[i % colores.length]}"
+      stroke-width="22" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}"
+      transform="rotate(-90 70 70)"><title>${esc(n)}: ${v}</title></circle>`;
+    off += len; return s;
+  }).join("");
+  return `<div class="donut-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140" style="flex-shrink:0">
+      ${segs}
+      <text x="70" y="66" text-anchor="middle" font-family="'Bricolage Grotesque',sans-serif" font-size="25" font-weight="800" fill="#1B1035">${total}</text>
+      <text x="70" y="83" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#7C7492">TOTAL</text>
+    </svg>
+    <div class="legend">${datos.map(([n, v], i) => `
+      <div><span class="sq" style="background:${colores[i % colores.length]}"></span>${esc(n)}<span class="v">${v}</span></div>`).join("")}</div>
+  </div>`;
+}
+
+function vStats() {
+  const cs = state.cepas;
+  const act = cs.filter(x => !["Descartada","No viable","Agotada"].includes(x.estado));
+  const nat = cs.filter(x => x.tipo === "nativa");
+
+  // resistencia por antibiótico
+  const abg = {};
+  nat.forEach(c => (c.antibiograma || []).forEach(a => {
+    if (!abg[a.atb]) abg[a.atb] = { S: 0, I: 0, R: 0 };
+    if (a.v) abg[a.atb][a.v]++;
+  }));
+  const resist = Object.entries(abg)
+    .map(([atb, o]) => { const t = o.S + o.I + o.R; return [atb, t ? Math.round(o.R / t * 100) : 0, t]; })
+    .filter(x => x[2] > 0).sort((a, b) => b[1] - a[1]);
+
+  const PAL = ["#4C2A85","#7B4FC4","#00B8A9","#F59E0B","#DC2626","#16A34A","#0EA5E9","#DB2777","#65A30D","#9333EA"];
+
+  $("#v-stats").innerHTML = `
+    <div class="sec-head">
+      <div><h2>Estadísticas del cepario</h2><p>Sobre ${cs.length} registros históricos · ${act.length} en custodia</p></div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start">
+
+      <div class="panel">
+        <div class="panel-h"><h3>Microorganismos más conservados</h3></div>
+        <div class="panel-b">${barras(conteo(cs, "microorganismo"), cs.length, 12)}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Composición del cepario</h3></div>
+        <div class="panel-b">${donut([
+          ["Nativas (paciente)", cs.filter(c=>c.tipo==="nativa").length],
+          ["Referencia ATCC", cs.filter(c=>c.tipo==="atcc").length]
+        ], ["#4C2A85","#00B8A9"])}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Mecanismos y fenotipos de resistencia</h3></div>
+        <div class="panel-b">${barras(conteo(nat, "perfiles"), nat.length, 12)}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Estado del semáforo</h3></div>
+        <div class="panel-b">${donut([
+          ["Vigentes", act.filter(c=>semaforo(c)==="verde").length],
+          ["Por vencer", act.filter(c=>semaforo(c)==="amarillo").length],
+          ["Vencidas / límite", act.filter(c=>semaforo(c)==="rojo").length]
+        ], [state.cfg.cVerde, state.cfg.cAmarillo, state.cfg.cRojo])}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Tipo de muestra</h3></div>
+        <div class="panel-b">${barras(conteo(nat, "tipoMuestra"), nat.length, 10)}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Servicio de procedencia</h3></div>
+        <div class="panel-b">${barras(conteo(nat, "servicio"), nat.length, 10)}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Resistencia por antibiótico</h3><div class="spacer"></div><span class="pill g tiny">% resistentes</span></div>
+        <div class="panel-b">${resist.length ? `<div class="bars">${resist.slice(0,14).map(([a,p,t]) => `
+          <div class="bar-row">
+            <span class="nm" style="font-style:normal">${esc(a)}</span>
+            <div class="track"><div class="fill" style="width:${p}%;background:linear-gradient(90deg,${state.cfg.cAmarillo},${state.cfg.cRojo})"></div></div>
+            <span class="vl">${p}% <span style="color:var(--ink-3);font-weight:400">n=${t}</span></span>
+          </div>`).join("")}</div>` : `<div class="empty-st"><p>Registra antibiogramas en las cepas nativas para ver este análisis.</p></div>`}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Distribución de pases (ATCC)</h3></div>
+        <div class="panel-b">${barras(conteo(cs.filter(c=>c.tipo==="atcc"), "pase").map(([p,v])=>[`Pase ${p}`,v]).sort((a,b)=>a[0].localeCompare(b[0])), cs.filter(c=>c.tipo==="atcc").length, 8)}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Medio de conservación</h3></div>
+        <div class="panel-b">${barras(conteo(cs, "medio"), cs.length, 8)}</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Motivo de conservación</h3></div>
+        <div class="panel-b">${barras(conteo(cs, "motivo"), cs.length, 8)}</div>
+      </div>
+
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. VISTA: CONFIGURACIÓN
+   ══════════════════════════════════════════════════════════════ */
+function vConfig() {
+  const c = state.cfg;
+  $("#v-config").innerHTML = `
+    <div class="sec-head">
+      <div><h2>Configuración</h2><p>Los cambios se aplican a todos los equipos conectados</p></div>
+      <div class="spacer"></div>
+      <div class="rowbtns"><button class="btn primary" onclick="app.saveCfg()">Guardar cambios</button></div>
+    </div>
+
+    <fieldset class="fset"><legend>Identidad</legend>
+      <div class="fgrid two">
+        <div class="f"><label>Título del banner</label><input id="cf_titulo" value="${esc(c.titulo)}"></div>
+        <div class="f"><label>Subtítulo</label><input id="cf_sub" value="${esc(c.subtitulo)}"></div>
+        <div class="f"><label>Línea superior</label><input id="cf_eye" value="${esc(c.eyebrow)}"></div>
+        <div class="f"><label>URL del logo</label><input id="cf_logo" value="${esc(c.logoUrl)}" placeholder="https://…/logo.png"><span class="hint">Deja vacío para mostrar el recuadro «LOGO»</span></div>
+        <div class="f"><label>Color de la marca</label><input type="color" id="cf_marca" value="${c.cMarca}" style="height:42px;padding:4px"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Semáforo · cepas nativas (por antigüedad)</legend>
+      <div class="fgrid">
+        <div class="f"><label>Verde hasta (meses)</label><input type="number" id="cf_nv" min="0" max="60" value="${c.natVerde}"><span class="hint">0–${c.natVerde} meses = los ${c.natVerde+1} meses más recientes</span></div>
+        <div class="f"><label>Amarillo hasta (meses)</label><input type="number" id="cf_na" min="0" max="60" value="${c.natAmarillo}"><span class="hint">${c.natVerde+1}–${c.natAmarillo} meses</span></div>
+        <div class="f"><label>Retención total (meses)</label><input type="number" id="cf_nr" min="1" max="120" value="${c.natRetencion}"><span class="hint">Define la fecha de descarte sugerida</span></div>
+        <div class="f"><label>Avisar con (días de antelación)</label><input type="number" id="cf_av" min="1" max="180" value="${c.diasAviso}"></div>
+      </div>
+      <div class="fgrid" style="margin-top:12px">
+        <div class="f"><label>Color verde</label><input type="color" id="cf_cv" value="${c.cVerde}" style="height:42px;padding:4px"></div>
+        <div class="f"><label>Color amarillo</label><input type="color" id="cf_ca" value="${c.cAmarillo}" style="height:42px;padding:4px"></div>
+        <div class="f"><label>Color rojo</label><input type="color" id="cf_cr" value="${c.cRojo}" style="height:42px;padding:4px"></div>
+        <div class="f"><label>Color de la tarjeta del mes según</label>
+          <select id="cf_crit">
+            <option value="edad" ${c.criterioMes==="edad"?"selected":""}>Antigüedad del mes</option>
+            <option value="peor" ${c.criterioMes==="peor"?"selected":""}>Peor estado de sus cepas</option>
+          </select></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Semáforo · cepas ATCC (por número de pase)</legend>
+      <div class="fgrid">
+        <div class="f"><label>Pase máximo permitido</label><input type="number" id="cf_pm" min="1" max="20" value="${c.atccPaseMax}"><span class="hint">ISO 11133 recomienda no exceder 4–5 pases desde la cepa original</span></div>
+        <div class="f"><label>Verde hasta el pase</label><input type="number" id="cf_pv" min="1" max="20" value="${c.atccVerde}"></div>
+        <div class="f"><label>Amarillo hasta el pase</label><input type="number" id="cf_pa" min="1" max="20" value="${c.atccAmarillo}"></div>
+        <div class="f"><label>Vigencia del cultivo de trabajo (días)</label><input type="number" id="cf_vd" min="1" max="365" value="${c.atccVigenciaDias}"><span class="hint">Se recalcula automáticamente al actualizar un pase</span></div>
+        <div class="f"><label>Vigencia del vial madre (meses)</label><input type="number" id="cf_vm" min="1" max="240" value="${c.atccVigenciaMeses}"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Acceso</legend>
+      <label class="sw"><input type="checkbox" id="cf_pinon" ${c.pinActivo?"checked":""}><span class="track"></span>
+        <span class="txt">Pedir PIN al abrir la aplicación</span></label>
+      <div class="f" style="max-width:220px"><label>PIN</label><input id="cf_pin" value="${esc(c.pin)}" inputmode="numeric" maxlength="8" placeholder="Ej. 4821"></div>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Listas desplegables</legend>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:12px">Un elemento por línea. Si dejas una lista vacía se usa la lista predeterminada.</p>
+      <div class="fgrid two">
+        ${[["microorganismos","Microorganismos"],["tiposMuestra","Tipos de muestra"],["servicios","Servicios"],
+           ["perfiles","Mecanismos de resistencia"],["medios","Medios de conservación"],["equipos","Equipos / ubicaciones"],
+           ["motivos","Motivos de conservación"],["antibioticos","Antibióticos del antibiograma"]].map(([k,n]) => `
+          <div class="f"><label>${n}</label>
+            <textarea id="cf_cat_${k}" style="min-height:120px;font-size:12.5px">${esc(((c.catalogos||{})[k]||[]).join("\n"))}</textarea>
+            <span class="hint">${(cat(k)||[]).length} elementos en uso</span></div>`).join("")}
+      </div>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Datos</legend>
+      <div class="rowbtns">
+        <button class="btn" onclick="app.exportCSV()">Exportar cepas a CSV</button>
+        <button class="btn" onclick="app.exportJSON()">Descargar respaldo (JSON)</button>
+        <button class="btn" onclick="app.diagnostico()">Probar conexión con Firebase</button>
+        <button class="btn danger" onclick="app.resetCfg()">Restablecer configuración</button>
+      </div>
+      <p style="font-size:12px;color:var(--ink-3);margin-top:12px">
+        Proyecto Firebase: <code style="font-family:var(--mono)">cepario-hdsrz</code> ·
+        ${cloudOK ? "sincronización en vivo activa" : "trabajando en modo local"}
+      </p>
+    </fieldset>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. MODALES
+   ══════════════════════════════════════════════════════════════ */
+function abrirModal(html, ancho = "") {
+  const d = document.createElement("div");
+  d.className = "ovl";
+  d.innerHTML = `<div class="modal ${ancho}">${html}</div>`;
+  d.addEventListener("click", e => { if (e.target === d) cerrarModal(); });
+  $("#modals").appendChild(d);
+  document.body.style.overflow = "hidden";
+  return d;
+}
+function cerrarModal() {
+  const m = $("#modals").lastElementChild;
+  if (m) m.remove();
+  if (!$("#modals").children.length) document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarModal(); });
+
+function opts(lista, sel) {
+  return `<option value=""></option>` + lista.map(o => `<option value="${esc(o)}" ${o === sel ? "selected" : ""}>${esc(o)}</option>`).join("");
+}
+
+/* ---------- Formulario de cepa ---------- */
+function nuevoCodigo(tipo) {
+  const y = new Date().getFullYear();
+  const pre = tipo === "atcc" ? "REF" : "NAT";
+  const n = state.cepas.filter(c => c.tipo === tipo && (c.codigo || "").includes(`-${y}-`)).length + 1;
+  return `${pre}-${y}-${String(n).padStart(3, "0")}`;
+}
+
+function formCepa(tipo, id) {
+  const ed = id ? state.cepas.find(c => c.id === id) : null;
+  const c = ed || {
+    tipo, codigo: nuevoCodigo(tipo), fechaIngreso: hoy(), estado: "Activa",
+    pase: 1, fechaPase: hoy(), perfiles: [], antibiograma: [], bsl: "BSL-2",
+    clase: tipo === "atcc" ? "Cepa de reserva (stock)" : ""
+  };
+  const esATCC = c.tipo === "atcc";
+
+  const html = `
+    <div class="mhead">
+      <div><h3>${ed ? "Editar" : "Nueva"} cepa ${esATCC ? "de referencia (ATCC)" : "nativa (paciente)"}</h3>
+        <div class="msub">${ed ? esc(c.codigo) : "Se guardará en el mes de la fecha de ingreso"}</div></div>
+      <button class="x" onclick="app.cerrar()">×</button>
+    </div>
+    <div class="mbody">
+      <input type="hidden" id="fc_id" value="${esc(c.id || "")}">
+      <input type="hidden" id="fc_tipo" value="${c.tipo}">
+
+      <fieldset class="fset"><legend>Identificación</legend>
+        <div class="fgrid">
+          <div class="f"><label>Código interno <span class="req">*</span></label><input id="fc_codigo" value="${esc(c.codigo)}"></div>
+          <div class="f"><label>Microorganismo <span class="req">*</span></label>
+            <input id="fc_org" list="dlOrg" value="${esc(c.microorganismo || "")}" placeholder="Escribe o elige…">
+            <datalist id="dlOrg">${cat("microorganismos").map(o => `<option value="${esc(o)}">`).join("")}</datalist></div>
+          <div class="f"><label>Nivel de bioseguridad</label><select id="fc_bsl">${opts(cat("bsl"), c.bsl)}</select></div>
+          <div class="f"><label>Método de identificación</label><select id="fc_ident">${opts(cat("identificacion"), c.identificacion)}</select></div>
+        </div>
+      </fieldset>
+
+      ${esATCC ? `
+      <fieldset class="fset"><legend>Trazabilidad de la cepa de referencia</legend>
+        <div class="fgrid">
+          <div class="f"><label>Código de referencia <span class="req">*</span></label><input id="fc_ref" value="${esc(c.codigoRef || "")}" placeholder="ATCC 25922 / WDCM 00012"></div>
+          <div class="f"><label>Proveedor</label><select id="fc_prov">${opts(cat("proveedores"), c.proveedor)}</select></div>
+          <div class="f"><label>N.° de lote</label><input id="fc_lote" value="${esc(c.lote || "")}"></div>
+          <div class="f"><label>Fecha de recepción</label><input type="date" id="fc_recep" value="${esc(c.fechaRecepcion || "")}"></div>
+          <div class="f"><label>Clase de cepa</label><select id="fc_clase">${opts(cat("conservacion"), c.clase)}</select></div>
+          <div class="f"><label>Certificado de conformidad</label><input id="fc_cert" value="${esc(c.certificado || "")}" placeholder="N.° o ubicación del certificado"></div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fset"><legend>Control de pases</legend>
+        <div class="fgrid">
+          <div class="f"><label>N.° de pase actual <span class="req">*</span></label>
+            <input type="number" id="fc_pase" min="0" max="20" value="${c.pase ?? 1}" onchange="app.recalcPase()">
+            <span class="hint">Máximo configurado: ${state.cfg.atccPaseMax}</span></div>
+          <div class="f"><label>Fecha del último pase</label><input type="date" id="fc_fpase" value="${esc(c.fechaPase || hoy())}" onchange="app.recalcPase()"></div>
+          <div class="f"><label>Vence el cultivo de trabajo</label><input type="date" id="fc_fvence" value="${esc(c.fechaVence || sumarDias(c.fechaPase || hoy(), state.cfg.atccVigenciaDias))}">
+            <span class="hint">Se recalcula solo al cambiar el pase</span></div>
+          <div class="f"><label>Deriva del pase</label><input id="fc_madre" value="${esc(c.cepaMadre || "")}" placeholder="Ej. vial madre lote 8849"></div>
+          <div class="f full"><label>Propósito del cultivo</label><input id="fc_proposito" value="${esc(c.proposito || "")}" placeholder="Control de medios, antibiograma CLSI, verificación bioquímica…"></div>
+        </div>
+      </fieldset>
+      ` : `
+      <fieldset class="fset"><legend>Origen del aislamiento</legend>
+        <div class="fgrid">
+          <div class="f"><label>N.° de muestra / laboratorio</label><input id="fc_nmuestra" value="${esc(c.numMuestra || "")}"></div>
+          <div class="f"><label>Tipo de muestra</label><select id="fc_tmuestra">${opts(cat("tiposMuestra"), c.tipoMuestra)}</select></div>
+          <div class="f"><label>Servicio de procedencia</label><select id="fc_serv">${opts(cat("servicios"), c.servicio)}</select></div>
+          <div class="f"><label>Identificador del paciente</label><input id="fc_pac" value="${esc(c.paciente || "")}" placeholder="Iniciales o n.° de historia">
+            <span class="hint">Usa un identificador no sensible cuando sea posible</span></div>
+          <div class="f"><label>Fecha de aislamiento</label><input type="date" id="fc_faisl" value="${esc(c.fechaAislamiento || "")}"></div>
+          <div class="f"><label>¿Es aislamiento de IAAS?</label><select id="fc_iaas">${opts(["Sí","No","No determinado"], c.iaas)}</select></div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fset"><legend>Perfil de resistencia</legend>
+        <div class="multi">
+          ${cat("perfiles").map(p => `<label><input type="checkbox" class="fc_perfil" value="${esc(p)}" ${(c.perfiles || []).includes(p) ? "checked" : ""}><span>${esc(p)}</span></label>`).join("")}
+        </div>
+        <div class="fgrid" style="margin-top:14px">
+          <div class="f"><label>Enviada al LDSP / INS</label><select id="fc_ins">${opts(["No","Sí — pendiente de resultado","Sí — con resultado"], c.envioINS)}</select></div>
+          <div class="f"><label>Fecha de envío</label><input type="date" id="fc_finsdate" value="${esc(c.fechaINS || "")}"></div>
+          <div class="f full"><label>Resultado de la confirmación</label><input id="fc_insres" value="${esc(c.resultadoINS || "")}" placeholder="Ej. blaKPC positivo por PCR"></div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fset"><legend>Antibiograma <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-3)">(opcional — alimenta las estadísticas)</span></legend>
+        <div class="abg" id="abgBox">
+          ${cat("antibioticos").map(a => {
+            const v = (c.antibiograma || []).find(x => x.atb === a)?.v || "";
+            return `<div class="ab" data-atb="${esc(a)}">
+              <span class="n" title="${esc(a)}">${esc(a)}</span>
+              <div class="opts">${["S","I","R"].map(o => `<button type="button" data-v="${o}" class="${v === o ? "on" : ""}" onclick="app.setAB(this)">${o}</button>`).join("")}</div>
+            </div>`;
+          }).join("")}
+        </div>
+      </fieldset>
+      `}
+
+      <fieldset class="fset"><legend>Conservación y ubicación</legend>
+        <div class="fgrid">
+          <div class="f"><label>Fecha de ingreso al cepario <span class="req">*</span></label><input type="date" id="fc_fing" value="${esc(c.fechaIngreso || hoy())}"></div>
+          <div class="f"><label>Medio / método</label><select id="fc_medio">${opts(cat("medios"), c.medio)}</select></div>
+          <div class="f"><label>Equipo</label><select id="fc_equipo">${opts(cat("equipos"), c.ubicEquipo)}</select></div>
+          <div class="f"><label>Caja / gradilla</label><input id="fc_caja" value="${esc(c.ubicCaja || "")}" placeholder="Caja A1"></div>
+          <div class="f"><label>Posición</label><input id="fc_pos" value="${esc(c.ubicPos || "")}" placeholder="Pos 07"></div>
+          <div class="f"><label>N.° de viales</label><input type="number" id="fc_viales" min="0" value="${c.viales ?? 1}"></div>
+          <div class="f"><label>Motivo de conservación</label><select id="fc_motivo">${opts(cat("motivos"), c.motivo)}</select></div>
+          <div class="f"><label>Responsable</label><input id="fc_resp" value="${esc(c.responsable || "")}"></div>
+          <div class="f"><label>Estado</label><select id="fc_estado">${opts(cat("estados"), c.estado || "Activa")}</select></div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fset"><legend>Descarte</legend>
+        <div class="fgrid">
+          <div class="f"><label>Fecha de descarte</label><input type="date" id="fc_fdesc" value="${esc(c.fechaDescarte || "")}"></div>
+          <div class="f"><label>Método de inactivación</label><select id="fc_mdesc">${opts(["Autoclave 121 °C / 15 min","Incineración","Desinfección química","Traslado a otro laboratorio"], c.metodoDescarte)}</select></div>
+          <div class="f"><label>Responsable del descarte</label><input id="fc_rdesc" value="${esc(c.responsableDescarte || "")}"></div>
+        </div>
+      </fieldset>
+
+      <div class="f full"><label>Observaciones</label><textarea id="fc_obs">${esc(c.observaciones || "")}</textarea></div>
+    </div>
+    <div class="mfoot2">
+      ${ed ? `<button class="btn danger" onclick="app.borrarCepa('${ed.id}')">Eliminar</button>` : ""}
+      <button class="btn" onclick="app.cerrar()">Cancelar</button>
+      <button class="btn primary" onclick="app.saveCepa()">${ed ? "Guardar cambios" : "Registrar cepa"}</button>
+    </div>`;
+  abrirModal(html, "wide");
+}
+
+function setAB(btn) {
+  const box = btn.closest(".opts");
+  const yaEstaba = btn.classList.contains("on");
+  box.querySelectorAll("button").forEach(b => b.classList.remove("on"));
+  if (!yaEstaba) btn.classList.add("on");
+}
+function recalcPase() {
+  const fp = $("#fc_fpase");
+  const fv = $("#fc_fvence");
+  if (fp && fv && fp.value) fv.value = sumarDias(fp.value, state.cfg.atccVigenciaDias);
+}
+
+function val(id) { const e = $("#" + id); return e ? e.value.trim() : ""; }
+
+async function saveCepa() {
+  const id = val("fc_id");
+  const tipo = val("fc_tipo");
+  const prev = id ? state.cepas.find(c => c.id === id) : null;
+
+  const org = val("fc_org"), codigo = val("fc_codigo"), fing = val("fc_fing");
+  if (!codigo) return toast("Falta el código interno de la cepa.", "err");
+  if (!org) return toast("Falta el microorganismo.", "err");
+  if (!fing) return toast("Falta la fecha de ingreso al cepario.", "err");
+
+  const c = {
+    id: id || uid(), tipo, codigo, microorganismo: org,
+    bsl: val("fc_bsl"), identificacion: val("fc_ident"),
+    fechaIngreso: fing, mesId: fing.slice(0, 7),
+    medio: val("fc_medio"), ubicEquipo: val("fc_equipo"), ubicCaja: val("fc_caja"),
+    ubicPos: val("fc_pos"), viales: +val("fc_viales") || 0, motivo: val("fc_motivo"),
+    responsable: val("fc_resp"), estado: val("fc_estado") || "Activa",
+    fechaDescarte: val("fc_fdesc"), metodoDescarte: val("fc_mdesc"), responsableDescarte: val("fc_rdesc"),
+    observaciones: val("fc_obs"),
+    creado: prev?.creado || new Date().toISOString(),
+    historial: prev?.historial || []
+  };
+
+  if (tipo === "atcc") {
+    Object.assign(c, {
+      codigoRef: val("fc_ref"), proveedor: val("fc_prov"), lote: val("fc_lote"),
+      fechaRecepcion: val("fc_recep"), clase: val("fc_clase"), certificado: val("fc_cert"),
+      pase: +val("fc_pase") || 0, fechaPase: val("fc_fpase"), fechaVence: val("fc_fvence"),
+      cepaMadre: val("fc_madre"), proposito: val("fc_proposito")
+    });
+    if (prev && +prev.pase !== c.pase)
+      c.historial.push({ f: new Date().toISOString(), t: `Pase actualizado: ${prev.pase} → ${c.pase} (${fFecha(c.fechaPase)})` });
+  } else {
+    Object.assign(c, {
+      numMuestra: val("fc_nmuestra"), tipoMuestra: val("fc_tmuestra"), servicio: val("fc_serv"),
+      paciente: val("fc_pac"), fechaAislamiento: val("fc_faisl"), iaas: val("fc_iaas"),
+      envioINS: val("fc_ins"), fechaINS: val("fc_finsdate"), resultadoINS: val("fc_insres"),
+      perfiles: [...document.querySelectorAll(".fc_perfil:checked")].map(i => i.value),
+      antibiograma: [...document.querySelectorAll("#abgBox .ab")].map(el => {
+        const on = el.querySelector(".opts button.on");
+        return on ? { atb: el.dataset.atb, v: on.dataset.v } : null;
+      }).filter(Boolean)
+    });
+  }
+
+  if (prev && prev.estado !== c.estado)
+    c.historial.push({ f: new Date().toISOString(), t: `Estado: ${prev.estado} → ${c.estado}` });
+  if (!prev) c.historial.push({ f: new Date().toISOString(), t: "Cepa registrada en el cepario" });
+
+  // asegurar que exista el mes
+  if (!state.meses.some(m => m.id === c.mesId)) {
+    const nm = { id: c.mesId, anio: +c.mesId.split("-")[0], mes: +c.mesId.split("-")[1], auto: true, creado: new Date().toISOString() };
+    state.meses.push(nm);
+    if (db) { try { await setDoc(doc(db, "meses", nm.id), nm); } catch (e) {} }
+  }
+
+  await guardar("cepas", c);
+  cerrarModal();
+  toast(id ? "Cambios guardados" : `Cepa ${c.codigo} registrada`, "ok");
+}
+
+async function borrarCepa(id) {
+  const c = state.cepas.find(x => x.id === id);
+  if (!confirm(`¿Eliminar definitivamente ${c?.codigo}?\n\nSi la cepa fue descartada físicamente, es mejor cambiar su estado a «Descartada» para conservar la trazabilidad.`)) return;
+  await borrar("cepas", id);
+  cerrarModal(); toast("Cepa eliminada", "ok");
+}
+
+/* ---------- Detalle de cepa ---------- */
+function detalle(id) {
+  const c = state.cepas.find(x => x.id === id);
+  if (!c) return;
+  const s = semaforo(c);
+  const esATCC = c.tipo === "atcc";
+  const venc = esATCC ? c.fechaVence : vencimientoNativa(c);
+  const qcs = state.qc.filter(q => q.cepaId === id).sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  const it = (k, v) => (v !== "" && v !== null && v !== undefined)
+    ? `<div class="it"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>` : "";
+
+  abrirModal(`
+    <div class="mhead" style="background:linear-gradient(115deg,${colorSem(s)}CC,${colorSem(s)}88),linear-gradient(115deg,var(--brand-deep),#5B2E9D)">
+      <div><h3 style="font-style:italic">${esc(c.microorganismo)}</h3>
+        <div class="msub">${esc(c.codigo)} · ${esATCC ? "referencia ATCC" : "nativa (paciente)"} · ${mesLabel(c.mesId)}</div></div>
+      <button class="x" onclick="app.cerrar()">×</button>
+    </div>
+    <div class="mbody">
+      <div class="rowbtns" style="margin-bottom:16px">
+        <span class="pill ${claseSem(s)}">${textoSem(s, c.tipo)}</span>
+        <span class="pill">${esc(c.estado || "Activa")}</span>
+        ${esATCC ? `<span class="pill ${claseSem(s)}">pase ${c.pase || 0} de ${state.cfg.atccPaseMax}</span>` : ""}
+        ${c.bsl ? `<span class="pill g">${esc(c.bsl)}</span>` : ""}
+        <div class="spacer" style="margin-left:auto"></div>
+        ${esATCC ? `<button class="btn sm" onclick="app.subirPase('${c.id}')">Registrar nuevo pase</button>` : ""}
+        <button class="btn sm" onclick="app.formQC(null,'${c.id}')">Control de calidad</button>
+        <button class="btn sm primary" onclick="app.cerrar();app.formCepa('${c.tipo}','${c.id}')">Editar</button>
+      </div>
+
+      <fieldset class="fset"><legend>Conservación</legend>
+        <div class="dl">
+          ${it("Ingreso al cepario", fFecha(c.fechaIngreso))}
+          ${it(esATCC ? "Vence cultivo de trabajo" : `Descarte sugerido (${state.cfg.natRetencion} meses)`, fFecha(venc))}
+          ${it("Medio / método", c.medio)}
+          ${it("Ubicación", [c.ubicEquipo, c.ubicCaja, c.ubicPos].filter(Boolean).join(" / "))}
+          ${it("Viales disponibles", c.viales)}
+          ${it("Motivo", c.motivo)}
+          ${it("Responsable", c.responsable)}
+        </div>
+      </fieldset>
+
+      ${esATCC ? `
+      <fieldset class="fset"><legend>Trazabilidad de referencia</legend>
+        <div class="dl">
+          ${it("Código de referencia", c.codigoRef)}
+          ${it("Proveedor", c.proveedor)}
+          ${it("Lote", c.lote)}
+          ${it("Recepción", fFecha(c.fechaRecepcion))}
+          ${it("Clase", c.clase)}
+          ${it("Certificado", c.certificado)}
+          ${it("Pase actual", `${c.pase || 0} de ${state.cfg.atccPaseMax}`)}
+          ${it("Fecha del último pase", fFecha(c.fechaPase))}
+          ${it("Deriva de", c.cepaMadre)}
+          ${it("Propósito", c.proposito)}
+        </div>
+      </fieldset>` : `
+      <fieldset class="fset"><legend>Origen</legend>
+        <div class="dl">
+          ${it("N.° de muestra", c.numMuestra)}
+          ${it("Tipo de muestra", c.tipoMuestra)}
+          ${it("Servicio", c.servicio)}
+          ${it("Paciente", c.paciente)}
+          ${it("Aislamiento", fFecha(c.fechaAislamiento))}
+          ${it("IAAS", c.iaas)}
+          ${it("Identificación", c.identificacion)}
+          ${it("Envío a referencia", c.envioINS)}
+          ${it("Resultado INS", c.resultadoINS)}
+        </div>
+        ${(c.perfiles || []).length ? `<div style="margin-top:14px"><div class="k" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px">Mecanismos de resistencia</div>
+          <div class="chips">${c.perfiles.map(p => `<span class="pill r tiny">${esc(p)}</span>`).join("")}</div></div>` : ""}
+        ${(c.antibiograma || []).length ? `<div style="margin-top:14px"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px">Antibiograma</div>
+          <div class="chips">${c.antibiograma.map(a => `<span class="pill ${a.v === "R" ? "r" : a.v === "I" ? "a" : "v"} tiny">${esc(a.atb)} ${a.v}</span>`).join("")}</div></div>` : ""}
+      </fieldset>`}
+
+      ${c.fechaDescarte || c.metodoDescarte ? `<fieldset class="fset"><legend>Descarte</legend>
+        <div class="dl">${it("Fecha", fFecha(c.fechaDescarte))}${it("Método", c.metodoDescarte)}${it("Responsable", c.responsableDescarte)}</div>
+      </fieldset>` : ""}
+
+      ${c.observaciones ? `<fieldset class="fset"><legend>Observaciones</legend><p style="font-size:13.5px">${esc(c.observaciones)}</p></fieldset>` : ""}
+
+      <fieldset class="fset"><legend>Controles de calidad (${qcs.length})</legend>
+        ${qcs.length ? `<div class="tl">${qcs.map(q => `<div class="ev">
+          <div class="d">${fFecha(q.fecha)} · ${esc(q.analista || "—")}</div>
+          <b>${esc(q.resultado || "")}</b> — ${esc([q.pureza, q.viabilidad, q.confirmacion].filter(Boolean).join(" · ") || "sin detalle")}
+          ${q.observaciones ? `<div style="color:var(--ink-3);margin-top:2px">${esc(q.observaciones)}</div>` : ""}
+        </div>`).join("")}</div>` : `<p style="font-size:13px;color:var(--ink-3)">Aún no se ha verificado esta cepa.</p>`}
+      </fieldset>
+
+      ${(c.historial || []).length ? `<fieldset class="fset"><legend>Historial</legend>
+        <div class="tl">${[...c.historial].reverse().map(h => `<div class="ev"><div class="d">${fFecha((h.f || "").slice(0, 10))}</div>${esc(h.t)}</div>`).join("")}</div>
+      </fieldset>` : ""}
+    </div>
+    <div class="mfoot2"><button class="btn" onclick="app.cerrar()">Cerrar</button></div>`, "wide");
+}
+
+async function subirPase(id) {
+  const c = state.cepas.find(x => x.id === id);
+  if (!c) return;
+  const nuevo = Number(c.pase || 0) + 1;
+  if (nuevo > state.cfg.atccPaseMax) {
+    if (!confirm(`El pase ${nuevo} supera el máximo permitido (${state.cfg.atccPaseMax}).\n\nSegún ISO 11133 deberías reconstituir un vial madre nuevo en lugar de seguir subcultivando. ¿Registrar el pase de todas formas?`)) return;
+  }
+  c.pase = nuevo;
+  c.fechaPase = hoy();
+  c.fechaVence = sumarDias(hoy(), state.cfg.atccVigenciaDias);
+  c.historial = c.historial || [];
+  c.historial.push({ f: new Date().toISOString(), t: `Nuevo pase registrado: ${nuevo} (vence ${fFecha(c.fechaVence)})` });
+  await guardar("cepas", c);
+  cerrarModal(); detalle(id);
+  toast(`Pase ${nuevo} registrado · vence el ${fFecha(c.fechaVence)}`, "ok");
+}
+
+/* ---------- Mes ---------- */
+function verMes(mesId) {
+  const todas = cepasDeMes(mesId).sort((a, b) => (a.tipo || "").localeCompare(b.tipo || "") || (a.codigo || "").localeCompare(b.codigo || ""));
+  const nat = todas.filter(c => c.tipo === "nativa"), atc = todas.filter(c => c.tipo === "atcc");
+  const s = semaforoMes(mesId), e = edadMeses(mesId);
+
+  const tabla = arr => arr.length ? `<div class="twrap"><table style="min-width:560px">
+    <thead><tr><th>Código</th><th>Microorganismo</th><th>Origen / ref.</th><th>Ubicación</th><th>Estado</th></tr></thead>
+    <tbody>${arr.map(c => `<tr onclick="app.cerrar();app.detalle('${c.id}')" style="cursor:pointer">
+      <td><span class="code">${esc(c.codigo)}</span></td>
+      <td><span class="org">${esc(c.microorganismo)}</span></td>
+      <td style="font-size:12px">${esc(c.tipo === "atcc" ? (c.codigoRef || "—") : (c.tipoMuestra || "—"))}</td>
+      <td style="font-family:var(--mono);font-size:11.5px">${esc([c.ubicEquipo, c.ubicCaja, c.ubicPos].filter(Boolean).join(" / ") || "—")}</td>
+      <td><span class="pill ${claseSem(semaforo(c))} tiny">${esc(c.estado || "Activa")}</span></td>
+    </tr>`).join("")}</tbody></table></div>`
+    : `<div class="empty-st" style="padding:24px"><p>Sin cepas en este bloque.</p></div>`;
+
+  abrirModal(`
+    <div class="mhead" style="background:linear-gradient(115deg,${colorSem(s)}CC,${colorSem(s)}77),linear-gradient(115deg,var(--brand-deep),#5B2E9D)">
+      <div><h3 style="text-transform:capitalize">${mesLabel(mesId)}</h3>
+        <div class="msub">${todas.length} cepas · ${e === 0 ? "mes en curso" : `hace ${e} ${e === 1 ? "mes" : "meses"}`} · ${textoSem(s, "nativa")}</div></div>
+      <button class="x" onclick="app.cerrar()">×</button>
+    </div>
+    <div class="mbody">
+      <fieldset class="fset"><legend>Cepas nativas · paciente (${nat.length})</legend>${tabla(nat)}</fieldset>
+      <fieldset class="fset"><legend>Cepas de referencia ATCC (${atc.length})</legend>${tabla(atc)}</fieldset>
+    </div>
+    <div class="mfoot2">
+      <button class="btn danger" onclick="app.borrarMes('${mesId}')">Eliminar mes</button>
+      <button class="btn" onclick="app.cerrar()">Cerrar</button>
+      <button class="btn primary" onclick="app.cerrar();app.formCepa('nativa')">+ Cepa en este mes</button>
+    </div>`, "wide");
+}
+
+function formMes() {
+  const y = new Date().getFullYear();
+  abrirModal(`
+    <div class="mhead"><div><h3>Agregar mes</h3><div class="msub">Útil para registrar meses anteriores</div></div>
+      <button class="x" onclick="app.cerrar()">×</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="f"><label>Mes</label><select id="fm_mes">${MESES.map((m, i) => `<option value="${i + 1}" ${i === new Date().getMonth() ? "selected" : ""}>${m}</option>`).join("")}</select></div>
+        <div class="f"><label>Año</label><input type="number" id="fm_anio" value="${y}" min="2000" max="2100"></div>
+      </div>
+    </div>
+    <div class="mfoot2"><button class="btn" onclick="app.cerrar()">Cancelar</button>
+      <button class="btn primary" onclick="app.saveMes()">Agregar mes</button></div>`, "narrow");
+}
+
+async function saveMes() {
+  const m = String($("#fm_mes").value).padStart(2, "0");
+  const a = $("#fm_anio").value;
+  const id = `${a}-${m}`;
+  if (state.meses.some(x => x.id === id)) { cerrarModal(); return toast("Ese mes ya existe en el cepario", "warn"); }
+  await guardar("meses", { id, anio: +a, mes: +m, auto: false, creado: new Date().toISOString() });
+  cerrarModal(); toast(`${mesLabel(id)} agregado`, "ok");
+}
+
+async function borrarMes(id) {
+  const n = cepasDeMes(id).length;
+  if (n) return toast(`No se puede eliminar: ${mesLabel(id)} tiene ${n} cepa${n === 1 ? "" : "s"}. Muévelas o elimínalas primero.`, "err");
+  if (id === mesActual()) return toast("El mes en curso no se puede eliminar; se vuelve a crear solo.", "warn");
+  if (!confirm(`¿Eliminar ${mesLabel(id)} del cepario?`)) return;
+  await borrar("meses", id);
+  cerrarModal(); toast("Mes eliminado", "ok");
+}
+
+/* ---------- Control de calidad ---------- */
+function formQC(id, cepaId) {
+  const ed = id ? state.qc.find(q => q.id === id) : null;
+  const q = ed || { fecha: hoy(), cepaId: cepaId || "", resultado: "Conforme" };
+  const activas = [...state.cepas].sort((a, b) => (a.codigo || "").localeCompare(b.codigo || ""));
+
+  abrirModal(`
+    <div class="mhead"><div><h3>${ed ? "Editar" : "Nuevo"} control de calidad</h3>
+      <div class="msub">Pureza, viabilidad e identidad de la cepa</div></div>
+      <button class="x" onclick="app.cerrar()">×</button></div>
+    <div class="mbody">
+      <input type="hidden" id="fq_id" value="${esc(q.id || "")}">
+      <div class="fgrid">
+        <div class="f full"><label>Cepa <span class="req">*</span></label>
+          <select id="fq_cepa">
+            <option value=""></option>
+            ${activas.map(c => `<option value="${c.id}" ${q.cepaId === c.id ? "selected" : ""}>${esc(c.codigo)} — ${esc(c.microorganismo)}</option>`).join("")}
+          </select></div>
+        <div class="f"><label>Fecha <span class="req">*</span></label><input type="date" id="fq_fecha" value="${esc(q.fecha)}"></div>
+        <div class="f"><label>Resultado</label><select id="fq_res">${opts(["Conforme", "No conforme"], q.resultado)}</select></div>
+        <div class="f"><label>Pureza / Gram / morfología</label><input id="fq_pureza" value="${esc(q.pureza || "")}" placeholder="Bacilos Gram (−), colonia lactosa (+)"></div>
+        <div class="f"><label>Viabilidad / crecimiento</label><select id="fq_viab">${opts(["Excelente (18-24 h)", "Bueno (24 h)", "Bueno (48 h)", "Lento / escaso", "Sin crecimiento"], q.viabilidad)}</select></div>
+        <div class="f"><label>Confirmación bioquímica / identidad</label><input id="fq_conf" value="${esc(q.confirmacion || "")}" placeholder="Indol (+), oxidasa (−)…"></div>
+        <div class="f"><label>Analista</label><input id="fq_analista" value="${esc(q.analista || "")}"></div>
+        <div class="f full"><label>Observaciones / acción correctiva</label><textarea id="fq_obs">${esc(q.observaciones || "")}</textarea></div>
+      </div>
+    </div>
+    <div class="mfoot2">
+      ${ed ? `<button class="btn danger" onclick="app.borrarQC('${ed.id}')">Eliminar</button>` : ""}
+      <button class="btn" onclick="app.cerrar()">Cancelar</button>
+      <button class="btn primary" onclick="app.saveQC()">Guardar control</button>
+    </div>`);
+}
+
+async function saveQC() {
+  const cepaId = val("fq_cepa");
+  if (!cepaId) return toast("Elige la cepa que se controló.", "err");
+  const id = val("fq_id");
+  const q = {
+    id: id || uid(), cepaId, fecha: val("fq_fecha") || hoy(),
+    resultado: val("fq_res"), pureza: val("fq_pureza"), viabilidad: val("fq_viab"),
+    confirmacion: val("fq_conf"), analista: val("fq_analista"), observaciones: val("fq_obs"),
+    creado: new Date().toISOString()
+  };
+  await guardar("qc", q);
+  cerrarModal(); toast("Control de calidad registrado", "ok");
+}
+async function borrarQC(id) {
+  if (!confirm("¿Eliminar este registro de control de calidad?")) return;
+  await borrar("qc", id); cerrarModal(); toast("Registro eliminado", "ok");
+}
+
+/* ══════════════════════════════════════════════════════════════
+   15. CONFIGURACIÓN / EXPORTAR
+   ══════════════════════════════════════════════════════════════ */
+function saveCfg() {
+  const n = (id, def) => { const v = +val(id); return isNaN(v) ? def : v; };
+  const c = state.cfg;
+  Object.assign(c, {
+    titulo: val("cf_titulo") || DEFAULT_CFG.titulo,
+    subtitulo: val("cf_sub"), eyebrow: val("cf_eye"), logoUrl: val("cf_logo"),
+    cMarca: val("cf_marca"), cVerde: val("cf_cv"), cAmarillo: val("cf_ca"), cRojo: val("cf_cr"),
+    natVerde: n("cf_nv", 3), natAmarillo: n("cf_na", 5), natRetencion: n("cf_nr", 6),
+    diasAviso: n("cf_av", 15), criterioMes: val("cf_crit"),
+    atccPaseMax: n("cf_pm", 5), atccVerde: n("cf_pv", 3), atccAmarillo: n("cf_pa", 4),
+    atccVigenciaDias: n("cf_vd", 30), atccVigenciaMeses: n("cf_vm", 24),
+    pinActivo: $("#cf_pinon").checked, pin: val("cf_pin")
+  });
+  if (c.natAmarillo < c.natVerde) c.natAmarillo = c.natVerde;
+  c.catalogos = c.catalogos || {};
+  ["microorganismos","tiposMuestra","servicios","perfiles","medios","equipos","motivos","antibioticos"].forEach(k => {
+    const t = $("#cf_cat_" + k);
+    if (!t) return;
+    const arr = t.value.split("\n").map(s => s.trim()).filter(Boolean);
+    if (arr.length) c.catalogos[k] = arr; else delete c.catalogos[k];
+  });
+  guardarCfg(); toast("Configuración guardada", "ok");
+}
+function resetCfg() {
+  if (!confirm("¿Restablecer toda la configuración a los valores iniciales?")) return;
+  state.cfg = { ...DEFAULT_CFG }; guardarCfg(); toast("Configuración restablecida", "ok");
+}
+
+function descargar(nombre, contenido, tipo) {
+  const b = new Blob([contenido], { type: tipo });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = nombre; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function exportCSV() {
+  const cols = [
+    ["codigo","Código"],["tipo","Tipo"],["microorganismo","Microorganismo"],["mesId","Mes"],
+    ["fechaIngreso","Fecha ingreso"],["numMuestra","N° muestra"],["tipoMuestra","Tipo de muestra"],
+    ["servicio","Servicio"],["paciente","Paciente"],["fechaAislamiento","Fecha aislamiento"],
+    ["iaas","IAAS"],["codigoRef","Código referencia"],["proveedor","Proveedor"],["lote","Lote"],
+    ["fechaRecepcion","Recepción"],["pase","Pase"],["fechaPase","Fecha pase"],["fechaVence","Vence"],
+    ["medio","Medio"],["ubicEquipo","Equipo"],["ubicCaja","Caja"],["ubicPos","Posición"],
+    ["viales","Viales"],["motivo","Motivo"],["bsl","Bioseguridad"],["identificacion","Identificación"],
+    ["responsable","Responsable"],["estado","Estado"],["fechaDescarte","Fecha descarte"],
+    ["metodoDescarte","Método descarte"],["envioINS","Envío INS"],["resultadoINS","Resultado INS"],
+    ["observaciones","Observaciones"]
+  ];
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [cols.map(c => c[1]).concat(["Semáforo","Vence (calc.)","Perfiles","Antibiograma"]).map(q).join(";")];
+  cepasFiltradas().forEach(c => {
+    const base = cols.map(k => q(c[k[0]]));
+    base.push(q(semaforo(c)));
+    base.push(q(c.tipo === "nativa" ? vencimientoNativa(c) : c.fechaVence));
+    base.push(q((c.perfiles || []).join(" | ")));
+    base.push(q((c.antibiograma || []).map(a => `${a.atb}:${a.v}`).join(" | ")));
+    rows.push(base.join(";"));
+  });
+  descargar(`cepario_${hoy()}.csv`, "\uFEFF" + rows.join("\n"), "text/csv;charset=utf-8");
+  toast("CSV descargado", "ok");
+}
+function exportJSON() {
+  descargar(`respaldo_cepario_${hoy()}.json`,
+    JSON.stringify({ cepas: state.cepas, meses: state.meses, qc: state.qc, cfg: state.cfg }, null, 2),
+    "application/json");
+  toast("Respaldo descargado", "ok");
+}
+
+/* ══════════════════════════════════════════════════════════════
+   16. PIN
+   ══════════════════════════════════════════════════════════════ */
+function checkPin() {
+  const v = $("#pinInput").value.trim();
+  if (v === String(state.cfg.pin)) {
+    $("#pinGate").classList.remove("on");
+    sessionStorage.setItem("cepario_pin_ok", "1");
+  } else { toast("PIN incorrecto", "err"); $("#pinInput").value = ""; }
+}
+function evaluarPin() {
+  if (state.cfg.pinActivo && state.cfg.pin && !sessionStorage.getItem("cepario_pin_ok")) {
+    $("#pinGate").classList.add("on"); $("#pinInput").focus();
+  } else $("#pinGate").classList.remove("on");
+}
+$("#pinInput").addEventListener("keydown", e => { if (e.key === "Enter") checkPin(); });
+
+/* ══════════════════════════════════════════════════════════════
+   17. RENDER
+   ══════════════════════════════════════════════════════════════ */
+let pendiente = null;
+function render() {
+  clearTimeout(pendiente);
+  pendiente = setTimeout(() => {
+    renderTabs(); evaluarPin();
+    ({ inicio: vInicio, cepario: vCepario, cepas: vCepas, qc: vQC, stats: vStats, config: vConfig }[state.view] || vInicio)();
+  }, 20);
+}
+
+function setF(k, v) {
+  state.filtro[k] = v;
+  if (k === "q") { clearTimeout(setF._t); setF._t = setTimeout(refrescarTabla, 200); }
+  else vCepas();
+}
+function limpiarF() { state.filtro = { tipo: state.filtro.tipo, q: "", estado: "", mes: "", semaforo: "", org: "" }; vCepas(); }
+
+/* ══════════════════════════════════════════════════════════════
+   18. API PÚBLICA E INICIO
+   ══════════════════════════════════════════════════════════════ */
+window.app = {
+  ir, setF, limpiarF, formCepa, saveCepa, borrarCepa, detalle, subirPase, setAB, recalcPase,
+  verMes, formMes, saveMes, borrarMes, formQC, saveQC, borrarQC,
+  saveCfg, resetCfg, exportCSV, exportJSON, cerrar: cerrarModal, diagnostico, copiarReglas
+};
+window.checkPin = checkPin;
+
+loadLocal();
+aplicarMarca();
+asegurarMesActual();
+render();
+escuchar();
+
+</script>
+
+<script>
+/* ══════════ PWA: instalación e integración con el sistema ══════════ */
+(function () {
+  var deferred = null;
+  var bar = document.getElementById("installBar");
+  var txt = document.getElementById("installTxt");
+  var btn = document.getElementById("installBtn");
+
+  var enPie = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  var ua = navigator.userAgent || "";
+  var esIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var esAndroid = /android/i.test(ua);
+
+  function ocultado() { try { return localStorage.getItem("pwa_oculto") === "1"; } catch (e) { return false; } }
+  function mostrar() { if (bar) bar.hidden = false; }
+  function ocultar() { if (bar) bar.hidden = true; try { localStorage.setItem("pwa_oculto", "1"); } catch (e) {} }
+
+  // ----- Android / Chrome / Edge: evento nativo de instalación -----
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    deferred = e;
+    if (!enPie && !ocultado()) mostrar();
+  });
+
+  window.addEventListener("appinstalled", function () {
+    if (bar) bar.hidden = true;
+    try { localStorage.setItem("pwa_oculto", "1"); } catch (e) {}
+    if (window.toast) toast("Cepario instalado", "ok");
+  });
+
+  async function instalar() {
+    // Caso Android: usar el prompt nativo
+    if (deferred) {
+      deferred.prompt();
+      try { await deferred.userChoice; } catch (e) {}
+      deferred = null;
+      if (bar) bar.hidden = true;
+      return;
+    }
+    // Caso iOS (Safari no ofrece prompt): mostrar instrucciones
+    if (esIOS) { instruccionesIOS(); return; }
+    // Otros navegadores
+    instruccionesGenericas();
+  }
+
+  function instruccionesIOS() {
+    var esSafari = /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
+    var m = document.createElement("div");
+    m.className = "ovl";
+    m.innerHTML =
+      '<div class="modal narrow">' +
+        '<div class="mhead"><div><h3>Instalar en iPhone / iPad</h3>' +
+          '<div class="msub">Se agrega a la pantalla de inicio como una app</div></div>' +
+          '<button class="x" onclick="this.closest(&quot;.ovl&quot;).remove()">×</button></div>' +
+        '<div class="mbody"><div class="ios-steps">' +
+          (esSafari ? "" :
+            '<div class="step"><div class="num">!</div><div>En iPhone esto solo funciona desde <b>Safari</b>. Abre este mismo enlace en Safari y repite los pasos.</div></div>') +
+          '<div class="step"><div class="num">1</div><div>Toca el botón <b>Compartir</b>' +
+            '<span class="shareico">&#x2191;</span> en la barra de Safari (abajo).</div></div>' +
+          '<div class="step"><div class="num">2</div><div>Desliza y elige <b>Añadir a pantalla de inicio</b>.</div></div>' +
+          '<div class="step"><div class="num">3</div><div>Confirma con <b>Añadir</b>. El ícono del cepario quedará en tu pantalla de inicio.</div></div>' +
+        '</div></div>' +
+        '<div class="mfoot2"><button class="btn primary" onclick="this.closest(&quot;.ovl&quot;).remove()">Entendido</button></div>' +
+      '</div>';
+    m.addEventListener("click", function (e) { if (e.target === m) m.remove(); });
+    document.getElementById("modals").appendChild(m);
+  }
+
+  function instruccionesGenericas() {
+    var m = document.createElement("div");
+    m.className = "ovl";
+    m.innerHTML =
+      '<div class="modal narrow">' +
+        '<div class="mhead"><div><h3>Instalar la app</h3></div>' +
+          '<button class="x" onclick="this.closest(&quot;.ovl&quot;).remove()">×</button></div>' +
+        '<div class="mbody"><p style="font-size:14px">Abre el menú del navegador (&#8942; o la barra de direcciones) y elige ' +
+          '<b>Instalar aplicación</b> o <b>Agregar a la pantalla de inicio</b>.</p></div>' +
+        '<div class="mfoot2"><button class="btn primary" onclick="this.closest(&quot;.ovl&quot;).remove()">Entendido</button></div>' +
+      '</div>';
+    m.addEventListener("click", function (e) { if (e.target === m) m.remove(); });
+    document.getElementById("modals").appendChild(m);
+  }
+
+  // En iOS no hay beforeinstallprompt: ofrecer el banner con instrucciones
+  if (esIOS && !enPie && !ocultado()) {
+    if (txt) txt.textContent = "Agrégalo a tu pantalla de inicio desde Safari para abrirlo como app.";
+    if (btn) btn.textContent = "Cómo instalar";
+    setTimeout(mostrar, 1200);
+  }
+
+  window.pwa = { instalar: instalar, ocultar: ocultar, iosHelp: instruccionesIOS };
+
+  // ----- Registro del Service Worker -----
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("service-worker.js").catch(function (e) {
+        console.warn("SW no registrado:", e);
+      });
+    });
+  }
+
+  // ----- Atajos del manifest / enlaces con ?ir= -----
+  window.addEventListener("load", function () {
+    try {
+      var p = new URLSearchParams(location.search);
+      var ir = p.get("ir");
+      if (ir && window.app) {
+        if (ir === "nativa" || ir === "atcc") { app.ir("cepario"); setTimeout(function(){ app.formCepa(ir); }, 300); }
+        else app.ir(ir);
+      }
+    } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
