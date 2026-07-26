@@ -474,6 +474,69 @@ td .org{font-style:italic;font-weight:500}
   border:1.5px solid var(--brand);border-radius:6px;color:var(--brand);vertical-align:-5px;margin:0 2px;
 }
 
+
+/* ---------- SESIÓN / LOGIN / BLOQUEO ---------- */
+#authGate{
+  position:fixed;inset:0;z-index:500;display:none;place-items:center;padding:20px;
+  background:
+    radial-gradient(circle at 20% 120%, rgba(0,184,169,.25), transparent 50%),
+    linear-gradient(140deg,var(--brand-deep),#5B2E9D);
+}
+#authGate.on{display:grid}
+.authbox{
+  background:rgba(255,255,255,.9);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.6);border-radius:24px;box-shadow:var(--sh-3);
+  width:min(380px,92vw);padding:30px 26px;text-align:center;
+}
+.authlogo{width:66px;height:66px;margin:0 auto 14px;border-radius:18px;background:#fff;box-shadow:var(--sh-1);overflow:hidden;display:grid;place-items:center}
+.authlogo img{width:100%;height:100%;object-fit:contain}
+.authbox h2{font-family:var(--display);font-size:19px;font-weight:800;letter-spacing:-.01em}
+.authbox > p{font-size:13px;color:var(--ink-2);margin:6px 0 18px}
+.authlbl{display:block;text-align:left;font-size:11.5px;font-weight:600;color:var(--ink-2);margin:10px 2px 5px}
+.authinp{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:15px}
+.authinp:focus{border-color:var(--brand-soft);outline:none;box-shadow:0 0 0 3px rgba(123,79,196,.16)}
+.authbtn{width:100%;justify-content:center;margin-top:18px;padding:12px}
+.authlink{display:block;width:100%;margin-top:10px;color:var(--brand);font-size:13px;font-weight:600;background:none}
+.autherr{color:var(--rojo);font-size:12.5px;margin-top:10px;min-height:16px;font-weight:600}
+@media (prefers-color-scheme:dark){
+  .authbox{background:rgba(22,17,34,.9);border-color:rgba(255,255,255,.14)}
+  .authbox h2{color:#fff}.authbox>p{color:#C9C2DC}.authlbl{color:#C9C2DC}
+  .authinp{background:#0C0C10;color:#fff;border-color:rgba(255,255,255,.16)}
+}
+/* chip de usuario en el banner */
+.user-chip{
+  display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.24);border-radius:99px;padding:4px 11px 4px 4px;cursor:pointer;
+  color:#fff;font-size:12.5px;font-weight:600;
+}
+.user-chip:hover{background:rgba(255,255,255,.26)}
+.user-chip .uav{width:24px;height:24px;border-radius:99px;background:var(--accent);color:#08312d;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:12px}
+
+/* fila de permiso con interruptor */
+.multi-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line-2);font-size:13.5px}
+.multi-row:last-child{border-bottom:none}
+
+/* ---------- GRADILLAS ---------- */
+.grad-wrap{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,300px));justify-content:start}
+.grad{background:var(--card);border:1px solid var(--line);border-radius:var(--r-m);box-shadow:var(--sh-1);padding:14px}
+.grad-h{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.grad-h b{font-family:var(--display);font-size:14px;font-weight:700}
+.grad-h .gcount{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.grid-cells{display:grid;gap:4px}
+.gcell{
+  aspect-ratio:1;border-radius:50%;border:1.5px solid var(--line);background:var(--line-2);
+  display:grid;place-items:center;font-family:var(--mono);font-size:7px;color:var(--ink-3);
+  padding:0;min-width:0;max-width:26px;justify-self:center;width:100%;position:relative;transition:transform .1s;
+}
+.gcell span{opacity:.45;pointer-events:none}
+.gcell.fill{background:var(--col);border-color:var(--col);cursor:pointer;box-shadow:inset 0 -2px 4px rgba(0,0,0,.12)}
+.gcell.fill span{color:#fff;opacity:.9;font-weight:700}
+.gcell.fill:hover{transform:scale(1.18);z-index:2;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+@media (max-width:640px){
+  .grad-wrap{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .gcell{max-width:24px} .gcell span{font-size:7px}
+}
+
 /* ---------- IMPRESIÓN ---------- */
 @media print{
   .tabs,.banner-side,.rowbtns,.filters,.btn,.mfoot,#toasts,.install-bar{display:none!important}
@@ -516,6 +579,7 @@ td .org{font-style:italic;font-weight:500}
         </picture>
       </div>
       <div class="sync off" id="syncBadge" onclick="app.diagnostico()"><span class="dot"></span><span id="syncTxt">Conectando…</span></div>
+      <div class="user-chip" id="userChip" hidden onclick="app.formPerfil()"></div>
     </div>
   </div>
 </header>
@@ -527,6 +591,7 @@ td .org{font-style:italic;font-weight:500}
 <main>
   <div class="view on" id="v-inicio"></div>
   <div class="view" id="v-cepario"></div>
+  <div class="view" id="v-gradillas"></div>
   <div class="view" id="v-cepas"></div>
   <div class="view" id="v-qc"></div>
   <div class="view" id="v-stats"></div>
@@ -545,10 +610,12 @@ td .org{font-style:italic;font-weight:500}
   </div>
 </div>
 
+<div id="authGate"></div>
 <div id="modals"></div>
 <div id="toasts"></div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs
@@ -660,6 +727,15 @@ const DEFAULT_CFG = {
   diasAviso: 15,
   pinActivo: false,
   pin: "",
+  // Sesión y usuarios
+  authActivo: false,
+  bloqueoMin: 60,
+  // Prefijos de código interno (consecutivo mensual)
+  prefijoNat: "NAT",
+  prefijoAtcc: "REF",
+  // Gradillas (visual)
+  gradillaNatCap: 100, gradillaNatCols: 10,
+  gradillaAtccCap: 50, gradillaAtccCols: 10,
   catalogos: {}
 };
 
@@ -667,9 +743,10 @@ const DEFAULT_CFG = {
    3. ESTADO
    ══════════════════════════════════════════════════════════════ */
 const state = {
-  cepas: [], meses: [], qc: [],
+  cepas: [], meses: [], qc: [], usuarios: [], papelera: [],
   cfg: { ...DEFAULT_CFG },
   view: "inicio",
+  usuario: null,
   filtro: { tipo: "todas", q: "", estado: "", mes: "", semaforo: "", org: "" },
   ready: { cepas: false, meses: false, qc: false, cfg: false }
 };
@@ -678,7 +755,8 @@ const LS = "cepario_hdsrz_v1";
 function saveLocal() {
   try {
     localStorage.setItem(LS, JSON.stringify({
-      cepas: state.cepas, meses: state.meses, qc: state.qc, cfg: state.cfg
+      cepas: state.cepas, meses: state.meses, qc: state.qc,
+      usuarios: state.usuarios, papelera: state.papelera, cfg: state.cfg
     }));
   } catch (e) {}
 }
@@ -687,7 +765,8 @@ function loadLocal() {
     const d = JSON.parse(localStorage.getItem(LS) || "null");
     if (d) {
       state.cepas = d.cepas || []; state.meses = d.meses || [];
-      state.qc = d.qc || []; state.cfg = { ...DEFAULT_CFG, ...(d.cfg || {}) };
+      state.qc = d.qc || []; state.usuarios = d.usuarios || []; state.papelera = d.papelera || [];
+      state.cfg = { ...DEFAULT_CFG, ...(d.cfg || {}) };
     }
   } catch (e) {}
 }
@@ -983,7 +1062,7 @@ function copiarReglas() {
 function escuchar() {
   if (!db) { setSync("err", "Solo local"); return; }
   setSync("off", "Conectando…");
-  const cols = ["cepas", "meses", "qc"];
+  const cols = ["cepas", "meses", "qc", "usuarios", "papelera"];
   let errores = 0;
   cols.forEach(c => {
     onSnapshot(collection(db, c), snap => {
@@ -1020,6 +1099,7 @@ async function asegurarMesActual() {
 const TABS = [
   { id: "inicio",  nom: "Inicio" },
   { id: "cepario", nom: "Cepario" },
+  { id: "gradillas", nom: "Gradillas" },
   { id: "cepas",   nom: "Cepas" },
   { id: "qc",      nom: "Control de calidad" },
   { id: "stats",   nom: "Estadísticas" },
@@ -1118,10 +1198,7 @@ function vInicio() {
         <p>Actualizado al ${fFecha(hoy())} · retención de nativas: ${state.cfg.natRetencion} meses · pase máximo ATCC: ${state.cfg.atccPaseMax}</p>
       </div>
       <div class="spacer"></div>
-      <div class="rowbtns">
-        <button class="btn primary" onclick="app.formCepa('nativa')">+ Cepa nativa</button>
-        <button class="btn" onclick="app.formCepa('atcc')">+ Cepa ATCC</button>
-      </div>
+      <div class="rowbtns">${btnAgregar(true)}</div>
     </div>
 
     <div class="grid kpis" style="margin-bottom:16px">
@@ -1193,15 +1270,15 @@ function vCepario() {
         <span class="pill v tiny">0–${state.cfg.natVerde} meses</span>
         <span class="pill a tiny">${state.cfg.natVerde + 1}–${state.cfg.natAmarillo} meses</span>
         <span class="pill r tiny">${state.cfg.natAmarillo + 1}+ meses</span>
-        <button class="btn" onclick="app.formMes()">+ Agregar mes</button>
-        <button class="btn primary" onclick="app.formCepa('nativa')">+ Cepa</button>
+        ${can("crear") ? `<button class="btn" onclick="app.formMes()">+ Agregar mes</button>` : ""}
+        ${btnAgregar(true)}
       </div>
     </div>`;
 
   if (!ids.length) {
     html += `<div class="panel"><div class="empty-st"><div class="big">▦</div>
       <p>El cepario está vacío. El mes actual se crea solo al registrar la primera cepa.</p>
-      <button class="btn primary" onclick="app.formCepa('nativa')">Registrar una cepa</button></div></div>`;
+      ${btnAgregar(true)}</div></div>`;
     $("#v-cepario").innerHTML = html; return;
   }
 
@@ -1256,7 +1333,7 @@ function tarjetaMes(id) {
     </div>
     <div class="mfoot">
       <span>${e === 0 ? "mes en curso" : `hace ${e} ${e === 1 ? "mes" : "meses"}`}</span>
-      <button class="del" title="Eliminar mes" onclick="event.stopPropagation();app.borrarMes('${id}')">✕</button>
+      ${can("eliminarMes") ? `<button class="del" title="Eliminar mes" onclick="event.stopPropagation();app.borrarMes('${id}')">✕</button>` : ""}
     </div>
   </article>`;
 }
@@ -1294,9 +1371,9 @@ function vCepas() {
       <div><h2>Listado de cepas</h2><p id="cepasCount">${lista.length} de ${state.cepas.length} registros</p></div>
       <div class="spacer"></div>
       <div class="rowbtns">
-        <button class="btn" onclick="app.exportCSV()">Exportar CSV</button>
-        <button class="btn" onclick="window.print()">Imprimir</button>
-        <button class="btn primary" onclick="app.formCepa('${f.tipo === "atcc" ? "atcc" : "nativa"}')">+ Cepa</button>
+        ${can("exportar") ? `<button class="btn" onclick="app.exportCSV()">Exportar CSV</button>
+        <button class="btn" onclick="app.imprimir()">Imprimir</button>` : ""}
+        ${btnAgregar(true)}
       </div>
     </div>
 
@@ -1357,7 +1434,7 @@ function filasCepas(lista) {
             <td style="font-family:var(--mono);font-size:12px">${fFecha(c.fechaIngreso)}</td>
             <td style="font-family:var(--mono);font-size:12px;color:${s==="rojo"?"var(--rojo)":"inherit"}">${fFecha(v)}</td>
             <td><span class="pill ${claseSem(s)} tiny">${esc(c.estado||"Activa")}</span></td>
-            <td><button class="btn sm ghost" onclick="event.stopPropagation();app.formCepa('${c.tipo}','${c.id}')">Editar</button></td>
+            <td>${can("crear") ? `<button class="btn sm ghost" onclick="event.stopPropagation();app.formCepa('${c.tipo}','${c.id}')">Editar</button>` : ""}</td>
           </tr>`;
     }).join("")
   : `<tr><td colspan="10"><div class="empty-st"><div class="big">▤</div><p>No hay cepas que coincidan con el filtro.</p></div></td></tr>`;
@@ -1385,7 +1462,7 @@ function vQC() {
     <div class="sec-head">
       <div><h2>Control de calidad de cepas</h2><p>Verificación de pureza, viabilidad e identidad de la colección</p></div>
       <div class="spacer"></div>
-      <div class="rowbtns"><button class="btn primary" onclick="app.formQC()">+ Registrar control</button></div>
+      <div class="rowbtns">${can("crear") ? `<button class="btn primary" onclick="app.formQC()">+ Registrar control</button>` : ""}</div>
     </div>
 
     <div class="grid kpis" style="margin-bottom:16px">
@@ -1569,9 +1646,25 @@ function vConfig() {
     <div class="sec-head">
       <div><h2>Configuración</h2><p>Los cambios se aplican a todos los equipos conectados</p></div>
       <div class="spacer"></div>
-      <div class="rowbtns"><button class="btn primary" onclick="app.saveCfg()">Guardar cambios</button></div>
+      <div class="rowbtns">${can("config") ? `<button class="btn primary" onclick="app.saveCfg()">Guardar cambios</button>` : `<span class="pill g">Sólo lectura</span>`}</div>
     </div>
 
+    ${state.usuario ? `<fieldset class="fset"><legend>Mi sesión</legend>
+      <div class="rowbtns">
+        <span class="pill b">${esc(state.usuario.nombre)} · ${ROLES[state.usuario.rol]?.nom || state.usuario.rol}</span>
+        <button class="btn sm" onclick="app.formPerfil()">Cambiar mi contraseña</button>
+        <button class="btn sm danger" onclick="app.cerrarSesion()">Cerrar sesión</button>
+      </div></fieldset>` : ""}
+
+    ${can("usuarios") ? `<fieldset class="fset"><legend>Inicio de sesión con usuarios</legend>
+      <label class="sw"><input type="checkbox" id="cf_authon" ${c.authActivo?"checked":""} onchange="app.saveCfg()"><span class="track"></span>
+        <span class="txt">Exigir usuario y contraseña para usar la app</span></label>
+      <p class="hint" style="margin-top:4px">Desactívalo si necesitas trastear el index sin escribir la contraseña cada vez. ${usuariosActivos().length===0 ? "<b>Primero crea al menos un usuario administrador abajo.</b>" : ""}</p>
+      <div class="f" style="max-width:260px;margin-top:10px"><label>Bloquear por inactividad tras (minutos)</label>
+        <input type="number" id="cf_bloqueo" min="1" max="1440" value="${c.bloqueoMin}"><span class="hint">Al desbloquear vuelves donde estabas (mismo equipo).</span></div>
+    </fieldset>` : ""}
+
+    ${can("config") ? `
     <fieldset class="fset"><legend>Identidad</legend>
       <div class="fgrid two">
         <div class="f"><label>Título del banner</label><input id="cf_titulo" value="${esc(c.titulo)}"></div>
@@ -1611,10 +1704,20 @@ function vConfig() {
       </div>
     </fieldset>
 
-    <fieldset class="fset"><legend>Acceso</legend>
-      <label class="sw"><input type="checkbox" id="cf_pinon" ${c.pinActivo?"checked":""}><span class="track"></span>
-        <span class="txt">Pedir PIN al abrir la aplicación</span></label>
-      <div class="f" style="max-width:220px"><label>PIN</label><input id="cf_pin" value="${esc(c.pin)}" inputmode="numeric" maxlength="8" placeholder="Ej. 4821"></div>
+    <fieldset class="fset"><legend>Código interno de las cepas</legend>
+      <div class="fgrid">
+        <div class="f"><label>Prefijo de cepas nativas</label><input id="cf_pnat" value="${esc(c.prefijoNat)}" maxlength="8" placeholder="NAT"><span class="hint">Ejemplo: ${esc(c.prefijoNat)}-${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,"0")}-001</span></div>
+        <div class="f"><label>Prefijo de cepas ATCC / control externo</label><input id="cf_patcc" value="${esc(c.prefijoAtcc)}" maxlength="8" placeholder="REF"><span class="hint">El consecutivo (001, 002…) reinicia cada mes.</span></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Gradillas (vista de la nevera)</legend>
+      <div class="fgrid">
+        <div class="f"><label>Espacios por gradilla · nativas</label><input type="number" id="cf_gncap" min="1" max="400" value="${c.gradillaNatCap}"></div>
+        <div class="f"><label>Columnas · nativas</label><input type="number" id="cf_gncols" min="1" max="30" value="${c.gradillaNatCols}"><span class="hint">Ej.: 100 espacios y 10 columnas = 10×10</span></div>
+        <div class="f"><label>Espacios por gradilla · ATCC</label><input type="number" id="cf_gacap" min="1" max="400" value="${c.gradillaAtccCap}"></div>
+        <div class="f"><label>Columnas · ATCC</label><input type="number" id="cf_gacols" min="1" max="30" value="${c.gradillaAtccCols}"><span class="hint">Ej.: 50 espacios y 10 columnas = 5×10</span></div>
+      </div>
     </fieldset>
 
     <fieldset class="fset"><legend>Listas desplegables</legend>
@@ -1622,14 +1725,19 @@ function vConfig() {
       <div class="fgrid two">
         ${[["microorganismos","Microorganismos"],["tiposMuestra","Tipos de muestra"],["servicios","Servicios"],
            ["perfiles","Mecanismos de resistencia"],["medios","Medios de conservación"],["equipos","Equipos / ubicaciones"],
-           ["motivos","Motivos de conservación"],["antibioticos","Antibióticos del antibiograma"]].map(([k,n]) => `
+           ["motivos","Motivos de conservación"],["antibioticos","Antibióticos del antibiograma"],
+           ["estados","Estados de la cepa"],["bsl","Niveles de bioseguridad"],["identificacion","Métodos de identificación"],
+           ["proveedores","Proveedores (ATCC)"],["conservacion","Clases de cepa"]].map(([k,n]) => `
           <div class="f"><label>${n}</label>
             <textarea id="cf_cat_${k}" style="min-height:120px;font-size:12.5px">${esc(((c.catalogos||{})[k]||[]).join("\n"))}</textarea>
             <span class="hint">${(cat(k)||[]).length} elementos en uso</span></div>`).join("")}
       </div>
-    </fieldset>
+    </fieldset>` : ""}
 
-    <fieldset class="fset"><legend>Datos</legend>
+    ${can("usuarios") ? panelUsuarios() : ""}
+    ${can("papelera") ? panelPapelera() : ""}
+
+    ${can("exportar") ? `<fieldset class="fset"><legend>Datos</legend>
       <div class="rowbtns">
         <button class="btn" onclick="app.exportCSV()">Exportar cepas a CSV</button>
         <button class="btn" onclick="app.exportJSON()">Descargar respaldo (JSON)</button>
@@ -1640,7 +1748,9 @@ function vConfig() {
         Proyecto Firebase: <code style="font-family:var(--mono)">cepario-hdsrz</code> ·
         ${cloudOK ? "sincronización en vivo activa" : "trabajando en modo local"}
       </p>
-    </fieldset>`;
+    </fieldset>` : ""}`;
+
+  // paneles dinámicos ya incluidos arriba
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1667,11 +1777,11 @@ function opts(lista, sel) {
 }
 
 /* ---------- Formulario de cepa ---------- */
-function nuevoCodigo(tipo) {
-  const y = new Date().getFullYear();
-  const pre = tipo === "atcc" ? "REF" : "NAT";
-  const n = state.cepas.filter(c => c.tipo === tipo && (c.codigo || "").includes(`-${y}-`)).length + 1;
-  return `${pre}-${y}-${String(n).padStart(3, "0")}`;
+function nuevoCodigo(tipo, mesId) {
+  const [y, m] = (mesId || mesActual()).split("-");
+  const pre = tipo === "atcc" ? (state.cfg.prefijoAtcc || "REF") : (state.cfg.prefijoNat || "NAT");
+  const n = state.cepas.filter(c => c.tipo === tipo && c.mesId === `${y}-${m}`).length + 1;
+  return `${pre}-${y}-${m}-${String(n).padStart(3, "0")}`;
 }
 
 function formCepa(tipo, id) {
@@ -1679,7 +1789,8 @@ function formCepa(tipo, id) {
   const c = ed || {
     tipo, codigo: nuevoCodigo(tipo), fechaIngreso: hoy(), estado: "Activa",
     pase: 1, fechaPase: hoy(), perfiles: [], antibiograma: [], bsl: "BSL-2",
-    clase: tipo === "atcc" ? "Cepa de reserva (stock)" : ""
+    clase: tipo === "atcc" ? "Cepa de reserva (stock)" : "",
+    responsable: (!id && usuarioActual()) ? usuarioActual().nombre : ""
   };
   const esATCC = c.tipo === "atcc";
 
@@ -1774,7 +1885,7 @@ function formCepa(tipo, id) {
           <div class="f"><label>Posición</label><input id="fc_pos" value="${esc(c.ubicPos || "")}" placeholder="Pos 07"></div>
           <div class="f"><label>N.° de viales</label><input type="number" id="fc_viales" min="0" value="${c.viales ?? 1}"></div>
           <div class="f"><label>Motivo de conservación</label><select id="fc_motivo">${opts(cat("motivos"), c.motivo)}</select></div>
-          <div class="f"><label>Responsable</label><input id="fc_resp" value="${esc(c.responsable || "")}"></div>
+          <div class="f"><label>Responsable</label><input id="fc_resp" value="${esc(c.responsable || (usuarioActual()?usuarioActual().nombre:''))}" ${usuarioActual() ? "readonly style=\"background:var(--line-2)\"" : ""}>${usuarioActual() ? `<span class="hint">Se registra automáticamente con tu sesión</span>` : ""}</div>
           <div class="f"><label>Estado</label><select id="fc_estado">${opts(cat("estados"), c.estado || "Activa")}</select></div>
         </div>
       </fieldset>
@@ -1790,7 +1901,7 @@ function formCepa(tipo, id) {
       <div class="f full"><label>Observaciones</label><textarea id="fc_obs">${esc(c.observaciones || "")}</textarea></div>
     </div>
     <div class="mfoot2">
-      ${ed ? `<button class="btn danger" onclick="app.borrarCepa('${ed.id}')">Eliminar</button>` : ""}
+      ${ed && can("eliminar") ? `<button class="btn danger" onclick="app.borrarCepa('${ed.id}')">Eliminar</button>` : ""}
       <button class="btn" onclick="app.cerrar()">Cancelar</button>
       <button class="btn primary" onclick="app.saveCepa()">${ed ? "Guardar cambios" : "Registrar cepa"}</button>
     </div>`;
@@ -1812,6 +1923,7 @@ function recalcPase() {
 function val(id) { const e = $("#" + id); return e ? e.value.trim() : ""; }
 
 async function saveCepa() {
+  if (!can("crear")) return toast("No tienes permiso para modificar cepas.", "err");
   const id = val("fc_id");
   const tipo = val("fc_tipo");
   const prev = id ? state.cepas.find(c => c.id === id) : null;
@@ -1873,10 +1985,13 @@ async function saveCepa() {
 }
 
 async function borrarCepa(id) {
+  if (!can("eliminar")) return toast("No tienes permiso para eliminar cepas.", "err");
   const c = state.cepas.find(x => x.id === id);
-  if (!confirm(`¿Eliminar definitivamente ${c?.codigo}?\n\nSi la cepa fue descartada físicamente, es mejor cambiar su estado a «Descartada» para conservar la trazabilidad.`)) return;
+  if (!c) return;
+  if (!confirm(`¿Enviar ${c.codigo} a la papelera?\n\nPodrás recuperarla desde Configuración → Papelera. Si sólo fue descartada físicamente, mejor cambia su estado a «Descartada».`)) return;
+  await enviarPapelera("cepa", { cepa: c });
   await borrar("cepas", id);
-  cerrarModal(); toast("Cepa eliminada", "ok");
+  cerrarModal(); toast("Cepa enviada a la papelera", "ok");
 }
 
 /* ---------- Detalle de cepa ---------- */
@@ -1903,9 +2018,9 @@ function detalle(id) {
         ${esATCC ? `<span class="pill ${claseSem(s)}">pase ${c.pase || 0} de ${state.cfg.atccPaseMax}</span>` : ""}
         ${c.bsl ? `<span class="pill g">${esc(c.bsl)}</span>` : ""}
         <div class="spacer" style="margin-left:auto"></div>
-        ${esATCC ? `<button class="btn sm" onclick="app.subirPase('${c.id}')">Registrar nuevo pase</button>` : ""}
-        <button class="btn sm" onclick="app.formQC(null,'${c.id}')">Control de calidad</button>
-        <button class="btn sm primary" onclick="app.cerrar();app.formCepa('${c.tipo}','${c.id}')">Editar</button>
+        ${can("crear") && esATCC ? `<button class="btn sm" onclick="app.subirPase('${c.id}')">Registrar nuevo pase</button>` : ""}
+        ${can("crear") ? `<button class="btn sm" onclick="app.formQC(null,'${c.id}')">Control de calidad</button>` : ""}
+        ${can("crear") ? `<button class="btn sm primary" onclick="app.cerrar();app.formCepa('${c.tipo}','${c.id}')">Editar</button>` : ""}
       </div>
 
       <fieldset class="fset"><legend>Conservación</legend>
@@ -2019,9 +2134,10 @@ function verMes(mesId) {
       <fieldset class="fset"><legend>Cepas de referencia ATCC (${atc.length})</legend>${tabla(atc)}</fieldset>
     </div>
     <div class="mfoot2">
-      <button class="btn danger" onclick="app.borrarMes('${mesId}')">Eliminar mes</button>
+      ${can("eliminarMes") ? `<button class="btn danger" onclick="app.borrarMes('${mesId}')">Eliminar mes</button>` : ""}
       <button class="btn" onclick="app.cerrar()">Cerrar</button>
-      <button class="btn primary" onclick="app.cerrar();app.formCepa('nativa')">+ Cepa en este mes</button>
+      ${can("crear") ? `<button class="btn" onclick="app.cerrar();app.formCepa('atcc')">+ ATCC</button>
+      <button class="btn primary" onclick="app.cerrar();app.formCepa('nativa')">+ Nativa</button>` : ""}
     </div>`, "wide");
 }
 
@@ -2050,12 +2166,15 @@ async function saveMes() {
 }
 
 async function borrarMes(id) {
-  const n = cepasDeMes(id).length;
-  if (n) return toast(`No se puede eliminar: ${mesLabel(id)} tiene ${n} cepa${n === 1 ? "" : "s"}. Muévelas o elimínalas primero.`, "err");
+  if (!can("eliminarMes")) return toast("Sólo un administrador puede eliminar meses completos.", "err");
   if (id === mesActual()) return toast("El mes en curso no se puede eliminar; se vuelve a crear solo.", "warn");
-  if (!confirm(`¿Eliminar ${mesLabel(id)} del cepario?`)) return;
+  const cs = cepasDeMes(id);
+  const mes = state.meses.find(m => m.id === id) || { id, anio: +id.split("-")[0], mes: +id.split("-")[1] };
+  if (!confirm(`¿Eliminar ${mesLabel(id)}?\n\nSe moverán ${cs.length} cepa${cs.length === 1 ? "" : "s"} a la papelera y podrás restaurar el mes completo.`)) return;
+  await enviarPapelera("mes", { mes, cepas: cs });
+  for (const cc of cs) await borrar("cepas", cc.id);
   await borrar("meses", id);
-  cerrarModal(); toast("Mes eliminado", "ok");
+  cerrarModal(); toast("Mes enviado a la papelera", "ok");
 }
 
 /* ---------- Control de calidad ---------- */
@@ -2093,6 +2212,7 @@ function formQC(id, cepaId) {
 }
 
 async function saveQC() {
+  if (!can("crear")) return toast("No tienes permiso para modificar.", "err");
   const cepaId = val("fq_cepa");
   if (!cepaId) return toast("Elige la cepa que se controló.", "err");
   const id = val("fq_id");
@@ -2114,6 +2234,10 @@ async function borrarQC(id) {
    15. CONFIGURACIÓN / EXPORTAR
    ══════════════════════════════════════════════════════════════ */
 function saveCfg() {
+  // el interruptor de sesión (cf_authon) lo puede tocar quien administra usuarios
+  const authEl = $("#cf_authon");
+  if (authEl) state.cfg.authActivo = authEl.checked;
+  if (!can("config")) { guardarCfg(); return; }
   const n = (id, def) => { const v = +val(id); return isNaN(v) ? def : v; };
   const c = state.cfg;
   Object.assign(c, {
@@ -2124,11 +2248,15 @@ function saveCfg() {
     diasAviso: n("cf_av", 15), criterioMes: val("cf_crit"),
     atccPaseMax: n("cf_pm", 5), atccVerde: n("cf_pv", 3), atccAmarillo: n("cf_pa", 4),
     atccVigenciaDias: n("cf_vd", 30), atccVigenciaMeses: n("cf_vm", 24),
-    pinActivo: $("#cf_pinon").checked, pin: val("cf_pin")
+    bloqueoMin: n("cf_bloqueo", 60),
+    prefijoNat: (val("cf_pnat") || "NAT").toUpperCase(), prefijoAtcc: (val("cf_patcc") || "REF").toUpperCase(),
+    gradillaNatCap: n("cf_gncap", 100), gradillaNatCols: n("cf_gncols", 10),
+    gradillaAtccCap: n("cf_gacap", 50), gradillaAtccCols: n("cf_gacols", 10)
   });
   if (c.natAmarillo < c.natVerde) c.natAmarillo = c.natVerde;
   c.catalogos = c.catalogos || {};
-  ["microorganismos","tiposMuestra","servicios","perfiles","medios","equipos","motivos","antibioticos"].forEach(k => {
+  ["microorganismos","tiposMuestra","servicios","perfiles","medios","equipos","motivos","antibioticos",
+   "estados","bsl","identificacion","proveedores","conservacion"].forEach(k => {
     const t = $("#cf_cat_" + k);
     if (!t) return;
     const arr = t.value.split("\n").map(s => s.trim()).filter(Boolean);
@@ -2204,8 +2332,8 @@ let pendiente = null;
 function render() {
   clearTimeout(pendiente);
   pendiente = setTimeout(() => {
-    renderTabs(); evaluarPin();
-    ({ inicio: vInicio, cepario: vCepario, cepas: vCepas, qc: vQC, stats: vStats, config: vConfig }[state.view] || vInicio)();
+    renderTabs(); controlarAcceso();
+    ({ inicio: vInicio, cepario: vCepario, gradillas: vGradillas, cepas: vCepas, qc: vQC, stats: vStats, config: vConfig }[state.view] || vInicio)();
   }, 20);
 }
 
@@ -2219,18 +2347,528 @@ function limpiarF() { state.filtro = { tipo: state.filtro.tipo, q: "", estado: "
 /* ══════════════════════════════════════════════════════════════
    18. API PÚBLICA E INICIO
    ══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   v2 — USUARIOS · PERMISOS · SESIÓN · BLOQUEO · GRADILLAS · PAPELERA
+   ══════════════════════════════════════════════════════════════ */
+
+const PERMISOS = [
+  ["crear", "Crear y editar cepas y controles de calidad"],
+  ["eliminar", "Enviar cepas a la papelera"],
+  ["eliminarMes", "Eliminar meses completos"],
+  ["papelera", "Restaurar o vaciar la papelera"],
+  ["config", "Cambiar la configuración y las listas"],
+  ["usuarios", "Administrar usuarios"],
+  ["exportar", "Exportar e imprimir"]
+];
+const ROLES = {
+  admin:  { nom: "Administrador", perms: PERMISOS.map(p => p[0]) },
+  editor: { nom: "Editor",        perms: ["crear", "eliminar", "exportar"] },
+  lector: { nom: "Solo lectura",  perms: ["exportar"] }
+};
+
+function usuarioActual() { return state.usuario || null; }
+
+function can(perm) {
+  if (!state.cfg.authActivo) return true;         // sin sesión activada, todos pueden
+  const u = state.usuario;
+  if (!u) return false;
+  if (u.rol === "admin") return true;
+  const extra = u.permisos || {};
+  if (Object.prototype.hasOwnProperty.call(extra, perm)) return !!extra[perm];
+  return (ROLES[u.rol]?.perms || []).includes(perm);
+}
+
+function usuariosActivos() { return state.usuarios.filter(u => u.activo !== false); }
+function necesitaLogin() { return state.cfg.authActivo && usuariosActivos().length > 0 && !state.usuario; }
+
+/* ---------- Botones de agregar (dos: nativa y ATCC) ---------- */
+function btnAgregar(primario) {
+  if (!can("crear")) return "";
+  return `<button class="btn ${primario ? "primary" : ""}" onclick="app.formCepa('nativa')">+ Cepa nativa</button>
+          <button class="btn" onclick="app.formCepa('atcc')">+ Cepa ATCC</button>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SESIÓN: login inicial y pantalla de bloqueo
+   ══════════════════════════════════════════════════════════════ */
+let lockTimer = null, bloqueado = false;
+
+function reiniciarInactividad() {
+  clearTimeout(lockTimer);
+  if (state.cfg.authActivo && state.usuario && !bloqueado) {
+    const min = state.cfg.bloqueoMin || 60;
+    lockTimer = setTimeout(bloquearSesion, min * 60000);
+  }
+}
+["click", "keydown", "input", "touchstart", "mousemove"].forEach(ev =>
+  document.addEventListener(ev, () => reiniciarInactividad(), { passive: true }));
+
+function pantallaSesion(modo) {
+  // modo: "login" (entrada) | "lock" (bloqueo por inactividad)
+  const users = usuariosActivos();
+  const actual = modo === "lock" ? state.usuario : null;
+  const g = document.getElementById("authGate");
+  g.innerHTML = `
+    <div class="authbox">
+      <div class="authlogo"><img src="${(document.querySelector('#bLogo img')||{}).src||''}" alt=""></div>
+      <h2>${modo === "lock" ? "Sesión bloqueada" : "Cepario de Microbiología"}</h2>
+      <p>${modo === "lock"
+          ? "Se bloqueó por inactividad. Ingresa tu contraseña para continuar donde ibas."
+          : "Selecciona tu usuario e ingresa la contraseña."}</p>
+      <label class="authlbl">Usuario</label>
+      <select id="authUser" class="authinp">
+        ${users.map(u => `<option value="${u.id}" ${actual && actual.id === u.id ? "selected" : ""}>${esc(u.nombre)}${u.rol === "admin" ? " · admin" : ""}</option>`).join("")}
+      </select>
+      <label class="authlbl">Contraseña</label>
+      <input type="password" id="authPass" class="authinp" inputmode="text" autocomplete="off" placeholder="••••••••">
+      <button class="btn primary authbtn" onclick="app.entrar('${modo}')">${modo === "lock" ? "Desbloquear" : "Entrar"}</button>
+      ${modo === "lock" ? `<button class="authlink" onclick="app.entrarOtro()">Entrar con otro usuario</button>` : ""}
+      <p class="autherr" id="authErr"></p>
+    </div>`;
+  g.classList.add("on");
+  bloqueado = (modo === "lock");
+  setTimeout(() => { const p = document.getElementById("authPass"); if (p) p.focus(); }, 60);
+}
+
+function entrar(modo) {
+  const uid_ = document.getElementById("authUser")?.value;
+  const pass = document.getElementById("authPass")?.value || "";
+  const u = state.usuarios.find(x => x.id === uid_);
+  const err = document.getElementById("authErr");
+  if (!u) { if (err) err.textContent = "Selecciona un usuario."; return; }
+  if (String(u.password || "") !== pass) { if (err) err.textContent = "Contraseña incorrecta."; return; }
+
+  const cambioUsuario = !state.usuario || state.usuario.id !== u.id;
+  state.usuario = u;
+  try { sessionStorage.setItem("cepario_uid", u.id); } catch (e) {}
+  document.getElementById("authGate").classList.remove("on");
+  bloqueado = false;
+  reiniciarInactividad();
+
+  if (modo === "lock" && !cambioUsuario) {
+    // desbloqueo del mismo usuario → seguir donde estaba (no se toca nada)
+    aplicarUsuarioUI();
+    toast(`Bienvenido de nuevo, ${u.nombre.split(" ")[0]}`, "ok");
+  } else {
+    // login nuevo o cambio de usuario → cerrar modales y volver al inicio
+    document.getElementById("modals").innerHTML = "";
+    document.body.style.overflow = "";
+    ir("inicio");
+    toast(`Sesión iniciada: ${u.nombre}`, "ok");
+  }
+}
+function entrarOtro() { pantallaSesion("login"); }
+
+function bloquearSesion() {
+  if (!state.cfg.authActivo || !state.usuario || bloqueado) return;
+  pantallaSesion("lock");   // overlay encima; el estado y los modales quedan intactos
+}
+function cerrarSesion() {
+  if (!confirm("¿Cerrar sesión?")) return;
+  state.usuario = null;
+  try { sessionStorage.removeItem("cepario_uid"); } catch (e) {}
+  document.getElementById("modals").innerHTML = "";
+  document.body.style.overflow = "";
+  clearTimeout(lockTimer);
+  ir("inicio");
+  if (necesitaLogin()) pantallaSesion("login");
+  aplicarUsuarioUI();
+}
+
+function aplicarUsuarioUI() {
+  const chip = document.getElementById("userChip");
+  if (!chip) return;
+  if (state.cfg.authActivo && state.usuario) {
+    chip.hidden = false;
+    chip.innerHTML = `<span class="uav">${esc((state.usuario.nombre || "?").slice(0, 1).toUpperCase())}</span>
+      <span class="uname">${esc(state.usuario.nombre.split(" ")[0])}</span>`;
+  } else { chip.hidden = true; }
+}
+
+/* Se llama en cada render para mostrar/ocultar el login según el estado */
+function controlarAcceso() {
+  const gate = document.getElementById("authGate");
+  if (!necesitaLogin() && !bloqueado && gate) gate.classList.remove("on");
+  if (necesitaLogin() && !bloqueado) {
+    // intentar restaurar sesión de esta pestaña
+    let uid_ = null;
+    try { uid_ = sessionStorage.getItem("cepario_uid"); } catch (e) {}
+    const u = uid_ && state.usuarios.find(x => x.id === uid_ && x.activo !== false);
+    if (u) { state.usuario = u; reiniciarInactividad(); aplicarUsuarioUI(); return; }
+    pantallaSesion("login");
+  }
+  aplicarUsuarioUI();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAPELERA
+   ══════════════════════════════════════════════════════════════ */
+async function enviarPapelera(tipo, payload) {
+  await guardar("papelera", {
+    id: uid(), tipo, payload,
+    fecha: new Date().toISOString(),
+    por: state.usuario?.nombre || "—"
+  });
+}
+async function restaurarPapelera(id) {
+  const r = state.papelera.find(x => x.id === id);
+  if (!r) return;
+  if (r.tipo === "cepa") {
+    await guardar("cepas", r.payload.cepa);
+    if (!state.meses.some(m => m.id === r.payload.cepa.mesId)) {
+      const mi = r.payload.cepa.mesId;
+      await guardar("meses", { id: mi, anio: +mi.split("-")[0], mes: +mi.split("-")[1], auto: true, creado: new Date().toISOString() });
+    }
+  } else if (r.tipo === "mes") {
+    await guardar("meses", r.payload.mes);
+    for (const c of (r.payload.cepas || [])) await guardar("cepas", c);
+  }
+  await borrar("papelera", id);
+  toast("Restaurado correctamente", "ok");
+}
+async function purgarPapelera(id) {
+  if (!confirm("¿Eliminar esto de forma DEFINITIVA? No se podrá recuperar.")) return;
+  await borrar("papelera", id);
+  toast("Eliminado definitivamente", "warn");
+}
+async function vaciarPapelera() {
+  if (!state.papelera.length) return;
+  if (!confirm(`¿Vaciar la papelera por completo? Se eliminarán ${state.papelera.length} elemento(s) sin posibilidad de recuperación.`)) return;
+  for (const r of [...state.papelera]) await borrar("papelera", r.id);
+  toast("Papelera vaciada", "warn");
+}
+
+/* ══════════════════════════════════════════════════════════════
+   VISTA: GRADILLAS
+   ══════════════════════════════════════════════════════════════ */
+function vGradillas() {
+  const cfg = state.cfg;
+  const meses = [...new Set(state.cepas.map(c => c.mesId).filter(Boolean))].sort().reverse();
+  const activa = c => !["Descartada", "No viable", "Agotada"].includes(c.estado);
+
+  let html = `
+    <div class="sec-head">
+      <div><h2>Gradillas del cepario</h2>
+        <p>Vista física de la nevera. Cada círculo es un espacio; se llena a medida que registras cepas. Pasa el cursor para ver la cepa, o tócala para abrirla.</p></div>
+      <div class="spacer"></div>
+      <div class="rowbtns">
+        <span class="pill v tiny">vigente</span><span class="pill a tiny">por vencer</span>
+        <span class="pill r tiny">vencida</span>
+        ${can("config") ? `<button class="btn sm" onclick="app.ir('config')">Ajustar tamaño</button>` : ""}
+      </div>
+    </div>`;
+
+  const tipos = [
+    { t: "nativa", nom: "Nativas · paciente", cap: cfg.gradillaNatCap || 100, cols: cfg.gradillaNatCols || 10 },
+    { t: "atcc", nom: "Referencia ATCC", cap: cfg.gradillaAtccCap || 50, cols: cfg.gradillaAtccCols || 10 }
+  ];
+
+  let algo = false;
+  meses.forEach(mid => {
+    const bloquesMes = tipos.map(info => {
+      const cs = cepasDeMes(mid).filter(c => c.tipo === info.t && activa(c))
+        .sort((a, b) => (a.fechaIngreso || "").localeCompare(b.fechaIngreso || "") || (a.codigo || "").localeCompare(b.codigo || ""));
+      if (!cs.length) return "";
+      const nRacks = Math.ceil(cs.length / info.cap);
+      let out = "";
+      for (let r = 0; r < nRacks; r++) {
+        const chunk = cs.slice(r * info.cap, (r + 1) * info.cap);
+        out += gradilla(mid, info, r + 1, nRacks, chunk);
+      }
+      return out;
+    }).join("");
+    if (bloquesMes) {
+      algo = true;
+      html += `<div class="year-rule"><hr><span class="y" style="font-size:16px;text-transform:capitalize">${mesLabel(mid)}</span><hr></div>
+        <div class="grad-wrap">${bloquesMes}</div>`;
+    }
+  });
+
+  if (!algo) html += `<div class="panel"><div class="empty-st"><div class="big">▦</div><p>Aún no hay cepas activas para mostrar en las gradillas.</p>${can("crear") ? `<button class="btn primary" onclick="app.formCepa('nativa')">Registrar una cepa</button>` : ""}</div></div>`;
+
+  $("#v-gradillas").innerHTML = html;
+}
+
+function gradilla(mid, info, num, total, chunk) {
+  const cap = info.cap, cols = Math.max(1, Math.min(info.cap, info.cols));
+  let celdas = "";
+  for (let i = 0; i < cap; i++) {
+    const c = chunk[i];
+    if (c) {
+      const s = semaforo(c);
+      celdas += `<button class="gcell fill" style="--col:${colorSem(s)}"
+        title="${esc(c.codigo)} · ${esc(c.microorganismo)}"
+        onclick="app.detalle('${c.id}')"><span>${i + 1}</span></button>`;
+    } else {
+      celdas += `<span class="gcell"><span>${i + 1}</span></span>`;
+    }
+  }
+  return `<div class="grad">
+    <div class="grad-h">
+      <b>${info.nom}</b>
+      <span class="pill b tiny">Gradilla ${num}${total > 1 ? " / " + total : ""}</span>
+      <span class="gcount">${chunk.length}/${cap}</span>
+    </div>
+    <div class="grid-cells" style="grid-template-columns:repeat(${cols},1fr)">${celdas}</div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   IMPRESIÓN RÁPIDA (iframe dedicado, no imprime toda la app)
+   ══════════════════════════════════════════════════════════════ */
+function imprimir(tipo) {
+  if (!can("exportar")) return toast("No tienes permiso para imprimir", "err");
+  const cont = construirImpresion(tipo);
+  let f = document.getElementById("printFrame");
+  if (!f) {
+    f = document.createElement("iframe");
+    f.id = "printFrame";
+    f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+    document.body.appendChild(f);
+  }
+  const d = f.contentWindow.document;
+  d.open(); d.write(cont); d.close();
+  const go = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { window.print(); } };
+  if (f.contentWindow.document.readyState === "complete") setTimeout(go, 150);
+  else f.onload = () => setTimeout(go, 150);
+}
+
+function construirImpresion(tipo) {
+  const c = state.cfg;
+  const lista = (tipo === "cepario") ? [...state.cepas] : cepasFiltradas();
+  lista.sort((a, b) => (a.mesId || "").localeCompare(b.mesId || "") || (a.codigo || "").localeCompare(b.codigo || ""));
+  const fila = x => `<tr>
+    <td>${esc(x.codigo || "")}</td>
+    <td><i>${esc(x.microorganismo || "")}</i></td>
+    <td>${x.tipo === "atcc" ? "ATCC" : "Nativa"}</td>
+    <td>${esc(x.tipo === "atcc" ? (x.codigoRef || "") : (x.tipoMuestra || ""))}</td>
+    <td>${x.tipo === "atcc" ? ((x.pase ?? "") + "/" + c.atccPaseMax) : ""}</td>
+    <td>${esc([x.ubicEquipo, x.ubicCaja, x.ubicPos].filter(Boolean).join(" / "))}</td>
+    <td>${fFecha(x.fechaIngreso)}</td>
+    <td>${fFecha(x.tipo === "atcc" ? x.fechaVence : vencimientoNativa(x))}</td>
+    <td>${esc(x.estado || "")}</td>
+    <td>${esc(x.responsable || "")}</td>
+  </tr>`;
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>${esc(c.titulo)}</title>
+  <style>
+    *{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;box-sizing:border-box}
+    body{margin:14mm;color:#111}
+    h1{font-size:17px;margin:0 0 2px} .sub{color:#555;font-size:11px;margin-bottom:12px}
+    table{width:100%;border-collapse:collapse;font-size:9.5px}
+    th{background:#eee;text-align:left;padding:5px 6px;border:1px solid #bbb;font-size:8.5px;text-transform:uppercase;letter-spacing:.03em}
+    td{padding:4px 6px;border:1px solid #ccc;vertical-align:top}
+    tr:nth-child(even) td{background:#f7f7f9}
+    .foot{margin-top:10px;font-size:9px;color:#666;display:flex;justify-content:space-between}
+    @page{size:landscape;margin:10mm}
+  </style></head><body>
+    <h1>${esc(c.titulo)}</h1>
+    <div class="sub">${esc(c.subtitulo)} — Listado impreso el ${fFecha(hoy())} · ${lista.length} cepas${state.usuario ? " · " + esc(state.usuario.nombre) : ""}</div>
+    <table><thead><tr>
+      <th>Código</th><th>Microorganismo</th><th>Tipo</th><th>Origen / ref.</th><th>Pase</th>
+      <th>Ubicación</th><th>Ingreso</th><th>Vence</th><th>Estado</th><th>Responsable</th>
+    </tr></thead><tbody>${lista.map(fila).join("")}</tbody></table>
+    <div class="foot"><span>${esc(c.eyebrow)}</span><span>Cepario HDSR</span></div>
+  </body></html>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   USUARIOS (gestión por el administrador)
+   ══════════════════════════════════════════════════════════════ */
+function panelUsuarios() {
+  const us = [...state.usuarios].sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
+  return `<fieldset class="fset"><legend>Usuarios y permisos</legend>
+    <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:12px">
+      El administrador puede crear usuarios, asignar permisos y ver o restablecer contraseñas.</p>
+    <div class="rowbtns" style="margin-bottom:12px"><button class="btn primary sm" onclick="app.formUsuario()">+ Nuevo usuario</button></div>
+    <div class="twrap"><table style="min-width:620px">
+      <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Contraseña</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${us.length ? us.map(u => `<tr>
+        <td><b>${esc(u.nombre)}</b></td>
+        <td style="font-family:var(--mono);font-size:12px">${esc(u.usuario || "—")}</td>
+        <td><span class="pill ${u.rol === "admin" ? "r" : u.rol === "editor" ? "b" : "g"} tiny">${ROLES[u.rol]?.nom || u.rol}</span></td>
+        <td><span class="pwd" id="pwd_${u.id}" data-shown="0" style="font-family:var(--mono);font-size:12px">••••••</span>
+            <button class="btn ghost sm" onclick="app.verPwd('${u.id}')">👁</button></td>
+        <td>${u.activo === false ? `<span class="pill g tiny">inactivo</span>` : `<span class="pill v tiny">activo</span>`}</td>
+        <td style="white-space:nowrap"><button class="btn ghost sm" onclick="app.formUsuario('${u.id}')">Editar</button></td>
+      </tr>`).join("") : `<tr><td colspan="6"><div class="empty-st" style="padding:20px"><p>No hay usuarios. Crea el primero (será administrador).</p></div></td></tr>`}
+      </tbody></table></div>
+  </fieldset>`;
+}
+
+function verPwd(id) {
+  const el = document.getElementById("pwd_" + id);
+  const u = state.usuarios.find(x => x.id === id);
+  if (!el || !u) return;
+  if (el.dataset.shown === "1") { el.textContent = "••••••"; el.dataset.shown = "0"; }
+  else { el.textContent = u.password || "(vacía)"; el.dataset.shown = "1"; }
+}
+
+function formUsuario(id) {
+  const ed = id ? state.usuarios.find(u => u.id === id) : null;
+  const primerUsuario = state.usuarios.length === 0;
+  const u = ed || { rol: primerUsuario ? "admin" : "editor", activo: true, permisos: {} };
+  const permHTML = PERMISOS.map(([k, txt]) => {
+    const base = (ROLES[u.rol]?.perms || []).includes(k);
+    const val_ = Object.prototype.hasOwnProperty.call(u.permisos || {}, k) ? !!u.permisos[k] : base;
+    return `<label class="multi-row"><span>${txt}</span>
+      <span class="sw"><input type="checkbox" class="fu_perm" data-k="${k}" ${val_ ? "checked" : ""}><span class="track"></span></span></label>`;
+  }).join("");
+
+  abrirModal(`
+    <div class="mhead"><div><h3>${ed ? "Editar usuario" : "Nuevo usuario"}</h3>
+      <div class="msub">${primerUsuario ? "El primer usuario será administrador" : "Rol y permisos configurables"}</div></div>
+      <button class="x" onclick="app.cerrar()">×</button></div>
+    <div class="mbody">
+      <input type="hidden" id="fu_id" value="${esc(u.id || "")}">
+      <div class="fgrid">
+        <div class="f"><label>Nombre completo <span class="req">*</span></label><input id="fu_nombre" value="${esc(u.nombre || "")}" placeholder="Ana Muriel"></div>
+        <div class="f"><label>Usuario (para entrar) <span class="req">*</span></label><input id="fu_usuario" value="${esc(u.usuario || "")}" placeholder="ana.muriel"></div>
+        <div class="f"><label>Contraseña <span class="req">*</span></label><input id="fu_pass" value="${esc(u.password || "")}" placeholder="mínimo 4 caracteres"></div>
+        <div class="f"><label>Rol</label>
+          <select id="fu_rol" onchange="app.rolCambio()">
+            ${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.rol === k ? "selected" : ""}>${v.nom}</option>`).join("")}
+          </select><span class="hint">El rol fija los permisos base; abajo puedes ajustarlos uno por uno.</span></div>
+        <div class="f"><label>Estado</label><select id="fu_activo"><option value="1" ${u.activo !== false ? "selected" : ""}>Activo</option><option value="0" ${u.activo === false ? "selected" : ""}>Inactivo</option></select></div>
+      </div>
+      <fieldset class="fset" style="margin-top:14px"><legend>Permisos</legend>
+        <div id="fu_perms">${permHTML}</div>
+      </fieldset>
+    </div>
+    <div class="mfoot2">
+      ${ed && state.usuarios.length > 1 ? `<button class="btn danger" onclick="app.borrarUsuario('${ed.id}')">Eliminar</button>` : ""}
+      <button class="btn" onclick="app.cerrar()">Cancelar</button>
+      <button class="btn primary" onclick="app.saveUsuario()">${ed ? "Guardar" : "Crear usuario"}</button>
+    </div>`);
+}
+
+function rolCambio() {
+  const rol = document.getElementById("fu_rol").value;
+  const base = ROLES[rol]?.perms || [];
+  document.querySelectorAll(".fu_perm").forEach(chk => { chk.checked = base.includes(chk.dataset.k); });
+}
+
+async function saveUsuario() {
+  const id = val("fu_id");
+  const nombre = val("fu_nombre"), usuario = val("fu_usuario"), pass = val("fu_pass");
+  const rol = val("fu_rol");
+  if (!nombre) return toast("Falta el nombre.", "err");
+  if (!usuario) return toast("Falta el usuario para entrar.", "err");
+  if (!pass || pass.length < 4) return toast("La contraseña debe tener al menos 4 caracteres.", "err");
+  if (state.usuarios.some(u => u.id !== id && (u.usuario || "").toLowerCase() === usuario.toLowerCase()))
+    return toast("Ya existe un usuario con ese nombre de acceso.", "err");
+
+  const prev = id ? state.usuarios.find(u => u.id === id) : null;
+  const permisos = {};
+  document.querySelectorAll(".fu_perm").forEach(chk => {
+    const base = (ROLES[rol]?.perms || []).includes(chk.dataset.k);
+    if (chk.checked !== base) permisos[chk.dataset.k] = chk.checked;  // sólo guardar diferencias
+  });
+
+  const u = {
+    id: id || uid(), nombre, usuario, password: pass, rol,
+    activo: val("fu_activo") === "1", permisos,
+    creado: prev?.creado || new Date().toISOString()
+  };
+  await guardar("usuarios", u);
+  if (state.usuario && state.usuario.id === u.id) state.usuario = u;  // refrescar sesión propia
+  cerrarModal();
+  aplicarUsuarioUI();
+  toast(id ? "Usuario actualizado" : "Usuario creado", "ok");
+}
+
+async function borrarUsuario(id) {
+  if (state.usuarios.length <= 1) return toast("Debe quedar al menos un usuario.", "err");
+  const u = state.usuarios.find(x => x.id === id);
+  if (u.rol === "admin" && state.usuarios.filter(x => x.rol === "admin" && x.activo !== false).length <= 1)
+    return toast("No puedes eliminar al único administrador.", "err");
+  if (!confirm(`¿Eliminar al usuario ${u.nombre}?`)) return;
+  await borrar("usuarios", id);
+  if (state.usuario && state.usuario.id === id) cerrarSesion();
+  else { cerrarModal(); toast("Usuario eliminado", "ok"); }
+}
+
+/* Perfil: cambiar la propia contraseña */
+function formPerfil() {
+  const u = state.usuario;
+  if (!u) return;
+  abrirModal(`
+    <div class="mhead"><div><h3>Mi perfil</h3><div class="msub">${esc(u.nombre)} · ${ROLES[u.rol]?.nom}</div></div>
+      <button class="x" onclick="app.cerrar()">×</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="f full"><label>Contraseña actual</label><input type="password" id="pf_actual"></div>
+        <div class="f"><label>Nueva contraseña</label><input type="password" id="pf_nueva"></div>
+        <div class="f"><label>Repetir nueva</label><input type="password" id="pf_rep"></div>
+      </div>
+    </div>
+    <div class="mfoot2"><button class="btn" onclick="app.cerrar()">Cancelar</button>
+      <button class="btn primary" onclick="app.cambiarPass()">Cambiar contraseña</button></div>`, "narrow");
+}
+async function cambiarPass() {
+  const u = state.usuario;
+  const act = val("pf_actual"), nue = val("pf_nueva"), rep = val("pf_rep");
+  if (String(u.password || "") !== act) return toast("La contraseña actual no coincide.", "err");
+  if (!nue || nue.length < 4) return toast("La nueva contraseña debe tener al menos 4 caracteres.", "err");
+  if (nue !== rep) return toast("Las contraseñas nuevas no coinciden.", "err");
+  const nu = { ...u, password: nue };
+  await guardar("usuarios", nu);
+  state.usuario = nu;
+  cerrarModal(); toast("Contraseña actualizada", "ok");
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   PAPELERA (panel en configuración)
+   ══════════════════════════════════════════════════════════════ */
+function panelPapelera() {
+  const items = [...state.papelera].sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  return `<fieldset class="fset"><legend>Papelera (${items.length})</legend>
+    <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:12px">
+      Aquí llega lo que se elimina. Restaura lo que se borró por error o vacíala para liberar espacio.</p>
+    ${items.length ? `
+    <div class="rowbtns" style="margin-bottom:12px"><button class="btn danger sm" onclick="app.vaciarPapelera()">Vaciar papelera</button></div>
+    <div class="alist" style="border:1px solid var(--line);border-radius:12px;overflow:hidden">
+      ${items.map(r => {
+        const esCepa = r.tipo === "cepa";
+        const t = esCepa
+          ? `${esc(r.payload.cepa.codigo)} — <i>${esc(r.payload.cepa.microorganismo)}</i>`
+          : `Mes ${esc(mesLabel(r.payload.mes.id))} · ${(r.payload.cepas || []).length} cepa(s)`;
+        return `<div class="al">
+          <div class="ico ${esCepa ? "b" : "a"}">${esCepa ? "🧫" : "📅"}</div>
+          <div class="tx"><b>${t}</b><div class="m">Eliminado por ${esc(r.por)} · ${fFecha((r.fecha || "").slice(0, 10))}</div></div>
+          <button class="btn sm primary" onclick="app.restaurarPapelera('${r.id}')">Restaurar</button>
+          <button class="btn sm ghost" onclick="app.purgarPapelera('${r.id}')">Eliminar</button>
+        </div>`;
+      }).join("")}
+    </div>` : `<div class="empty-st" style="padding:24px"><p>La papelera está vacía.</p></div>`}
+  </fieldset>`;
+}
+
+
 window.app = {
   ir, setF, limpiarF, formCepa, saveCepa, borrarCepa, detalle, subirPase, setAB, recalcPase,
   verMes, formMes, saveMes, borrarMes, formQC, saveQC, borrarQC,
-  saveCfg, resetCfg, exportCSV, exportJSON, cerrar: cerrarModal, diagnostico, copiarReglas
+  saveCfg, resetCfg, exportCSV, exportJSON, cerrar: cerrarModal, diagnostico, copiarReglas,
+  imprimir, vGradillas,
+  entrar, entrarOtro, cerrarSesion, formPerfil, cambiarPass,
+  formUsuario, saveUsuario, borrarUsuario, verPwd, rolCambio,
+  restaurarPapelera, purgarPapelera, vaciarPapelera
 };
 window.checkPin = checkPin;
 
 loadLocal();
 aplicarMarca();
 asegurarMesActual();
+// restaurar sesión de esta pestaña (si aplica)
+try {
+  const uid_ = sessionStorage.getItem("cepario_uid");
+  if (uid_) { const u = state.usuarios.find(x => x.id === uid_); if (u) state.usuario = u; }
+} catch (e) {}
+aplicarUsuarioUI();
+reiniciarInactividad();
 render();
 escuchar();
+
 
 </script>
 
