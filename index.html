@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#2A1354">
 <title>Cepario · Microbiología HDSR</title>
 
@@ -60,10 +60,13 @@ body{
   padding-bottom:env(safe-area-inset-bottom);
 }
 button,input,select,textarea{font:inherit;color:inherit}
+fieldset{min-width:0}
+img{max-width:100%}
 button{cursor:pointer;border:none;background:none}
 a{color:var(--brand);text-decoration:none}
 :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:4px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.safetop{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--brand-deep);z-index:65;pointer-events:none}
 
 /* ---------- BANNER ---------- */
 .banner{
@@ -116,7 +119,7 @@ a{color:var(--brand);text-decoration:none}
 
 /* ---------- TABS ---------- */
 .tabs{
-  background:var(--brand-deep); position:sticky; top:0; z-index:60;
+  background:var(--brand-deep); position:sticky; top:env(safe-area-inset-top); z-index:60;
   box-shadow:0 2px 12px rgba(27,16,53,.18);
 }
 .tabs-inner{max-width:1400px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:0 12px}
@@ -225,7 +228,7 @@ main{max-width:1400px;margin:0 auto;padding:24px 20px 80px}
 .mcard.empty{border-style:dashed;box-shadow:none;background:transparent}
 
 /* ---------- TABLA ---------- */
-.twrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.twrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;width:100%}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
 th{
   text-align:left;padding:10px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
@@ -262,7 +265,8 @@ td .org{font-style:italic;font-weight:500}
 /* ---------- FORMULARIO / MODAL ---------- */
 .ovl{
   position:fixed;inset:0;background:rgba(27,16,53,.55);backdrop-filter:blur(4px);z-index:200;
-  display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;
+  display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;
+  padding:16px;padding-top:calc(16px + env(safe-area-inset-top));
   animation:fade .18s ease;
 }
 .modal{
@@ -564,6 +568,7 @@ td .org{font-style:italic;font-weight:500}
   </div>
 </div>
 
+<div class="safetop" aria-hidden="true"></div>
 <header class="banner">
   <div class="banner-inner">
     <div>
@@ -1721,7 +1726,7 @@ function vConfig() {
     </fieldset>
 
     <fieldset class="fset"><legend>Listas desplegables</legend>
-      <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:12px">Un elemento por línea. Si dejas una lista vacía se usa la lista predeterminada.</p>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:12px">Cada lista ya trae sus elementos. Añade, quita o edita los que quieras (uno por línea) y guarda. Si borras una lista por completo, vuelve a la lista predeterminada.</p>
       <div class="fgrid two">
         ${[["microorganismos","Microorganismos"],["tiposMuestra","Tipos de muestra"],["servicios","Servicios"],
            ["perfiles","Mecanismos de resistencia"],["medios","Medios de conservación"],["equipos","Equipos / ubicaciones"],
@@ -1729,7 +1734,7 @@ function vConfig() {
            ["estados","Estados de la cepa"],["bsl","Niveles de bioseguridad"],["identificacion","Métodos de identificación"],
            ["proveedores","Proveedores (ATCC)"],["conservacion","Clases de cepa"]].map(([k,n]) => `
           <div class="f"><label>${n}</label>
-            <textarea id="cf_cat_${k}" style="min-height:120px;font-size:12.5px">${esc(((c.catalogos||{})[k]||[]).join("\n"))}</textarea>
+            <textarea id="cf_cat_${k}" style="min-height:140px;font-size:12.5px">${esc((cat(k)||[]).join("\n"))}</textarea>
             <span class="hint">${(cat(k)||[]).length} elementos en uso</span></div>`).join("")}
       </div>
     </fieldset>` : ""}
@@ -2407,6 +2412,9 @@ function pantallaSesion(modo) {
   // modo: "login" (entrada) | "lock" (bloqueo por inactividad)
   const users = usuariosActivos();
   const actual = modo === "lock" ? state.usuario : null;
+  let preId = actual ? actual.id : null;
+  if (!preId) { try { preId = localStorage.getItem("cepario_ultimo_uid"); } catch (e) {} }
+  if (!preId && users[0]) preId = users[0].id;
   const g = document.getElementById("authGate");
   g.innerHTML = `
     <div class="authbox">
@@ -2417,7 +2425,7 @@ function pantallaSesion(modo) {
           : "Selecciona tu usuario e ingresa la contraseña."}</p>
       <label class="authlbl">Usuario</label>
       <select id="authUser" class="authinp">
-        ${users.map(u => `<option value="${u.id}" ${actual && actual.id === u.id ? "selected" : ""}>${esc(u.nombre)}${u.rol === "admin" ? " · admin" : ""}</option>`).join("")}
+        ${users.map(u => `<option value="${u.id}" ${preId === u.id ? "selected" : ""}>${esc(u.nombre)}${u.mostrarRol ? " · " + (ROLES[u.rol]?.nom || u.rol) : ""}</option>`).join("")}
       </select>
       <label class="authlbl">Contraseña</label>
       <input type="password" id="authPass" class="authinp" inputmode="text" autocomplete="off" placeholder="••••••••">
@@ -2440,7 +2448,7 @@ function entrar(modo) {
 
   const cambioUsuario = !state.usuario || state.usuario.id !== u.id;
   state.usuario = u;
-  try { sessionStorage.setItem("cepario_uid", u.id); } catch (e) {}
+  try { sessionStorage.setItem("cepario_uid", u.id); localStorage.setItem("cepario_ultimo_uid", u.id); } catch (e) {}
   document.getElementById("authGate").classList.remove("on");
   bloqueado = false;
   reiniciarInactividad();
@@ -2730,6 +2738,8 @@ function formUsuario(id) {
           </select><span class="hint">El rol fija los permisos base; abajo puedes ajustarlos uno por uno.</span></div>
         <div class="f"><label>Estado</label><select id="fu_activo"><option value="1" ${u.activo !== false ? "selected" : ""}>Activo</option><option value="0" ${u.activo === false ? "selected" : ""}>Inactivo</option></select></div>
       </div>
+      <label class="sw" style="margin-top:12px"><input type="checkbox" id="fu_mostrarrol" ${u.mostrarRol ? "checked" : ""}><span class="track"></span>
+        <span class="txt">Mostrar su rol junto al nombre en la pantalla de inicio de sesión</span></label>
       <fieldset class="fset" style="margin-top:14px"><legend>Permisos</legend>
         <div id="fu_perms">${permHTML}</div>
       </fieldset>
@@ -2767,6 +2777,7 @@ async function saveUsuario() {
   const u = {
     id: id || uid(), nombre, usuario, password: pass, rol,
     activo: val("fu_activo") === "1", permisos,
+    mostrarRol: $("#fu_mostrarrol")?.checked || false,
     creado: prev?.creado || new Date().toISOString()
   };
   await guardar("usuarios", u);
