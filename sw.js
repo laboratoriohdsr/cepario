@@ -1,6 +1,6 @@
 /* Cepario HDSR — Service Worker
    Sube el número al editar la app para que los equipos actualicen. */
-const VERSION = "cepario-v11";
+const VERSION = "cepario-v13";
 const APP_SHELL = [
   "./", "./index.html", "./manifest.json",
   "./icon-192.png", "./icon-512.png", "./maskable-512.png",
