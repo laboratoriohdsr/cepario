@@ -265,13 +265,13 @@ td .org{font-style:italic;font-weight:500}
 /* ---------- FORMULARIO / MODAL ---------- */
 .ovl{
   position:fixed;inset:0;background:rgba(27,16,53,.55);backdrop-filter:blur(4px);z-index:200;
-  display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;
-  padding:16px;padding-top:calc(16px + env(safe-area-inset-top));
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  padding:16px;padding-top:calc(16px + env(safe-area-inset-top));padding-bottom:calc(16px + env(safe-area-inset-bottom));
   animation:fade .18s ease;
 }
 .modal{
   background:var(--bg);border-radius:20px;box-shadow:var(--sh-3);width:100%;max-width:860px;
-  overflow:hidden;margin:auto 0;animation:pop .22s cubic-bezier(.2,.9,.3,1.1);
+  overflow:hidden;display:flex;flex-direction:column;max-height:100%;animation:pop .22s cubic-bezier(.2,.9,.3,1.1);
 }
 .modal.wide{max-width:1120px}
 .modal.narrow{max-width:460px}
@@ -280,14 +280,15 @@ td .org{font-style:italic;font-weight:500}
   background:linear-gradient(115deg,var(--brand-deep),#5B2E9D);color:#fff;padding:17px 22px;
   display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:3;
 }
+.mhead{flex-shrink:0}
 .mhead h3{font-family:var(--display);font-size:17px;font-weight:700}
 .mhead .msub{font-size:12px;opacity:.72;margin-top:2px}
 .mhead .x{margin-left:auto;color:#fff;font-size:24px;line-height:1;padding:0 6px;opacity:.8}
 .mhead .x:hover{opacity:1}
-.mbody{padding:20px 22px;max-height:calc(100vh - 210px);overflow-y:auto}
+.mbody{padding:20px 22px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .mfoot2{
   padding:14px 22px;background:var(--card);border-top:1px solid var(--line);
-  display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;position:sticky;bottom:0;
+  display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;flex-shrink:0;
 }
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
 .fgrid.two{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
@@ -836,16 +837,19 @@ function semaforoATCC(cepa) {
   if (["Descartada", "No viable", "Contaminada", "Agotada"].includes(cepa.estado)) return "gris";
   const c = state.cfg;
   const p = Number(cepa.pase || 0);
-  let s = p <= c.atccVerde ? "verde" : (p <= c.atccAmarillo ? "amarillo" : "rojo");
-  // el vencimiento del cultivo de trabajo también puede degradar el color
+  // superar el máximo de pases obliga a reconstituir el vial madre (ISO 11133) → rojo
+  if (p > c.atccPaseMax) return "rojo";
+  // el color lo manda la fecha de vencimiento/descarte (al renovar un pase se refresca y vuelve a verde)
   if (cepa.fechaVence) {
     const d = diasEntre(hoy(), cepa.fechaVence);
     if (d !== null) {
-      if (d < 0) s = "rojo";
-      else if (d <= c.diasAviso && s === "verde") s = "amarillo";
+      if (d < 0) return "rojo";
+      if (d <= c.diasAviso) return "amarillo";
+      return "verde";
     }
   }
-  return s;
+  // sin fecha de vencimiento → por número de pase
+  return p <= c.atccVerde ? "verde" : (p <= c.atccAmarillo ? "amarillo" : "rojo");
 }
 function semaforo(cepa) { return cepa.tipo === "atcc" ? semaforoATCC(cepa) : semaforoNativa(cepa); }
 function semaforoMes(mesId) {
@@ -870,7 +874,7 @@ function colorSem(s) {
 function claseSem(s) { return { verde: "v", amarillo: "a", rojo: "r", gris: "g" }[s] || "g"; }
 function textoSem(s, tipo) {
   if (s === "gris") return "inactiva";
-  if (tipo === "atcc") return { verde: "pase ok", amarillo: "revisar", rojo: "pase límite" }[s];
+  if (tipo === "atcc") return { verde: "vigente", amarillo: "por vencer", rojo: "vencida / pase límite" }[s];
   return { verde: "vigente", amarillo: "por vencer", rojo: "vencida" }[s];
 }
 
@@ -1699,11 +1703,13 @@ function vConfig() {
       </div>
     </fieldset>
 
-    <fieldset class="fset"><legend>Semáforo · cepas ATCC (por número de pase)</legend>
+    <fieldset class="fset"><legend>Semáforo · cepas ATCC (por fecha de vencimiento)</legend>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:12px">El color lo marca la fecha de vencimiento del cultivo de trabajo. Al superar el pase máximo se marca en rojo (hay que reconstituir el vial madre).</p>
       <div class="fgrid">
+        <div class="f"><label>Amarillo cuando falten (días o menos)</label><input type="number" id="cf_aviso" min="0" max="365" value="${c.diasAviso}"><span class="hint">Verde si falta más tiempo; rojo si ya venció</span></div>
         <div class="f"><label>Pase máximo permitido</label><input type="number" id="cf_pm" min="1" max="20" value="${c.atccPaseMax}"><span class="hint">ISO 11133 recomienda no exceder 4–5 pases desde la cepa original</span></div>
-        <div class="f"><label>Verde hasta el pase</label><input type="number" id="cf_pv" min="1" max="20" value="${c.atccVerde}"></div>
-        <div class="f"><label>Amarillo hasta el pase</label><input type="number" id="cf_pa" min="1" max="20" value="${c.atccAmarillo}"></div>
+        <div class="f"><label>Verde hasta el pase (sin fecha)</label><input type="number" id="cf_pv" min="1" max="20" value="${c.atccVerde}"></div>
+        <div class="f"><label>Amarillo hasta el pase (sin fecha)</label><input type="number" id="cf_pa" min="1" max="20" value="${c.atccAmarillo}"></div>
         <div class="f"><label>Vigencia del cultivo de trabajo (días)</label><input type="number" id="cf_vd" min="1" max="365" value="${c.atccVigenciaDias}"><span class="hint">Se recalcula automáticamente al actualizar un pase</span></div>
         <div class="f"><label>Vigencia del vial madre (meses)</label><input type="number" id="cf_vm" min="1" max="240" value="${c.atccVigenciaMeses}"></div>
       </div>
@@ -1887,8 +1893,9 @@ function formCepa(tipo, id) {
           <div class="f"><label>Medio / método</label><select id="fc_medio">${opts(cat("medios"), c.medio)}</select></div>
           <div class="f"><label>Equipo</label><select id="fc_equipo">${opts(cat("equipos"), c.ubicEquipo)}</select></div>
           <div class="f"><label>Caja / gradilla</label><input id="fc_caja" value="${esc(c.ubicCaja || "")}" placeholder="Caja A1"></div>
-          <div class="f"><label>Posición</label><input id="fc_pos" value="${esc(c.ubicPos || "")}" placeholder="Pos 07"></div>
-          <div class="f"><label>N.° de viales</label><input type="number" id="fc_viales" min="0" value="${c.viales ?? 1}"></div>
+          <div class="f"><label>Posición en la gradilla</label><input type="number" id="fc_posgrad" min="1" value="${c.posGrad ?? siguientePosicion(tipo, (c.fechaIngreso || hoy()).slice(0,7), id)}"><span class="hint">Se sugiere el siguiente espacio libre; puedes cambiarla.</span></div>
+          <div class="f"><label>N.° de viales</label><input type="number" id="fc_viales" min="1" value="${c.viales ?? 1}"><span class="hint">Cada vial ocupa un espacio consecutivo en la gradilla.</span></div>
+          <div class="f"><label>Ubicación física (nota)</label><input id="fc_pos" value="${esc(c.ubicPos || "")}" placeholder="Ej. Congelador 2, caja A1"></div>
           <div class="f"><label>Motivo de conservación</label><select id="fc_motivo">${opts(cat("motivos"), c.motivo)}</select></div>
           <div class="f"><label>Responsable</label><input id="fc_resp" value="${esc(c.responsable || (usuarioActual()?usuarioActual().nombre:''))}" ${usuarioActual() ? "readonly style=\"background:var(--line-2)\"" : ""}>${usuarioActual() ? `<span class="hint">Se registra automáticamente con tu sesión</span>` : ""}</div>
           <div class="f"><label>Estado</label><select id="fc_estado">${opts(cat("estados"), c.estado || "Activa")}</select></div>
@@ -1943,7 +1950,7 @@ async function saveCepa() {
     bsl: val("fc_bsl"), identificacion: val("fc_ident"),
     fechaIngreso: fing, mesId: fing.slice(0, 7),
     medio: val("fc_medio"), ubicEquipo: val("fc_equipo"), ubicCaja: val("fc_caja"),
-    ubicPos: val("fc_pos"), viales: +val("fc_viales") || 0, motivo: val("fc_motivo"),
+    ubicPos: val("fc_pos"), viales: +val("fc_viales") || 1, posGrad: +val("fc_posgrad") || 0, motivo: val("fc_motivo"),
     responsable: val("fc_resp"), estado: val("fc_estado") || "Activa",
     fechaDescarte: val("fc_fdesc"), metodoDescarte: val("fc_mdesc"), responsableDescarte: val("fc_rdesc"),
     observaciones: val("fc_obs"),
@@ -2103,12 +2110,12 @@ async function subirPase(id) {
   }
   c.pase = nuevo;
   c.fechaPase = hoy();
-  c.fechaVence = sumarDias(hoy(), state.cfg.atccVigenciaDias);
+  c.fechaVence = sumarDias(hoy(), state.cfg.atccVigenciaDias);   // el nuevo pase estrena fecha de descarte → vuelve a verde
   c.historial = c.historial || [];
-  c.historial.push({ f: new Date().toISOString(), t: `Nuevo pase registrado: ${nuevo} (vence ${fFecha(c.fechaVence)})` });
+  c.historial.push({ f: new Date().toISOString(), t: `Nuevo pase registrado: ${nuevo} · nueva fecha de descarte ${fFecha(c.fechaVence)}` });
   await guardar("cepas", c);
   cerrarModal(); detalle(id);
-  toast(`Pase ${nuevo} registrado · vence el ${fFecha(c.fechaVence)}`, "ok");
+  toast(`Pase ${nuevo} registrado · nueva fecha de descarte ${fFecha(c.fechaVence)}`, "ok");
 }
 
 /* ---------- Mes ---------- */
@@ -2252,7 +2259,7 @@ function saveCfg() {
     natVerde: n("cf_nv", 3), natAmarillo: n("cf_na", 5), natRetencion: n("cf_nr", 6),
     diasAviso: n("cf_av", 15), criterioMes: val("cf_crit"),
     atccPaseMax: n("cf_pm", 5), atccVerde: n("cf_pv", 3), atccAmarillo: n("cf_pa", 4),
-    atccVigenciaDias: n("cf_vd", 30), atccVigenciaMeses: n("cf_vm", 24),
+    atccVigenciaDias: n("cf_vd", 30), atccVigenciaMeses: n("cf_vm", 24), diasAviso: n("cf_aviso", 15),
     bloqueoMin: n("cf_bloqueo", 60),
     prefijoNat: (val("cf_pnat") || "NAT").toUpperCase(), prefijoAtcc: (val("cf_patcc") || "REF").toUpperCase(),
     gradillaNatCap: n("cf_gncap", 100), gradillaNatCols: n("cf_gncols", 10),
@@ -2549,6 +2556,40 @@ async function vaciarPapelera() {
 /* ══════════════════════════════════════════════════════════════
    VISTA: GRADILLAS
    ══════════════════════════════════════════════════════════════ */
+function cepaActivaGrad(c) { return !["Descartada", "No viable", "Contaminada", "Agotada"].includes(c.estado); }
+
+// Coloca cada cepa en la gradilla: cada vial ocupa un espacio; respeta la posición fija si la hay.
+function secuenciaGradilla(activos) {
+  const occ = [];
+  const ocupar = (c) => {
+    const n = Math.max(1, Number(c.viales) || 1);
+    let start;
+    if (Number(c.posGrad) > 0) {
+      start = Number(c.posGrad) - 1;
+    } else {
+      start = 0;
+      for (;;) {
+        let libre = true;
+        for (let i = 0; i < n; i++) if (occ[start + i]) { libre = false; break; }
+        if (libre) break;
+        start++;
+      }
+    }
+    for (let i = 0; i < n; i++) occ[start + i] = c;
+  };
+  activos.filter(c => Number(c.posGrad) > 0).sort((a, b) => a.posGrad - b.posGrad).forEach(ocupar);
+  activos.filter(c => !(Number(c.posGrad) > 0))
+    .sort((a, b) => (a.fechaIngreso || "").localeCompare(b.fechaIngreso || "") || (a.codigo || "").localeCompare(b.codigo || ""))
+    .forEach(ocupar);
+  return occ;
+}
+
+// Siguiente espacio libre sugerido para una cepa nueva de ese mes+tipo.
+function siguientePosicion(tipo, mesId, excluirId) {
+  const activos = cepasDeMes(mesId || mesActual()).filter(c => c.tipo === tipo && cepaActivaGrad(c) && c.id !== excluirId);
+  return secuenciaGradilla(activos).length + 1;
+}
+
 function vGradillas() {
   const cfg = state.cfg;
   const meses = [...new Set(state.cepas.map(c => c.mesId).filter(Boolean))].sort().reverse();
@@ -2574,15 +2615,12 @@ function vGradillas() {
   let algo = false;
   meses.forEach(mid => {
     const bloquesMes = tipos.map(info => {
-      const cs = cepasDeMes(mid).filter(c => c.tipo === info.t && activa(c))
-        .sort((a, b) => (a.fechaIngreso || "").localeCompare(b.fechaIngreso || "") || (a.codigo || "").localeCompare(b.codigo || ""));
-      if (!cs.length) return "";
-      const nRacks = Math.ceil(cs.length / info.cap);
+      const activos = cepasDeMes(mid).filter(c => c.tipo === info.t && activa(c));
+      if (!activos.length) return "";
+      const occ = secuenciaGradilla(activos);
+      const nRacks = Math.max(1, Math.ceil(occ.length / info.cap));
       let out = "";
-      for (let r = 0; r < nRacks; r++) {
-        const chunk = cs.slice(r * info.cap, (r + 1) * info.cap);
-        out += gradilla(mid, info, r + 1, nRacks, chunk);
-      }
+      for (let r = 0; r < nRacks; r++) out += gradilla(info, r + 1, nRacks, occ, r * info.cap);
       return out;
     }).join("");
     if (bloquesMes) {
@@ -2597,25 +2635,28 @@ function vGradillas() {
   $("#v-gradillas").innerHTML = html;
 }
 
-function gradilla(mid, info, num, total, chunk) {
+function gradilla(info, num, total, occ, offset) {
   const cap = info.cap, cols = Math.max(1, Math.min(info.cap, info.cols));
-  let celdas = "";
+  let celdas = "", llenas = 0;
   for (let i = 0; i < cap; i++) {
-    const c = chunk[i];
+    const pos = offset + i;
+    const c = occ[pos];
     if (c) {
+      llenas++;
       const s = semaforo(c);
+      const nv = Number(c.viales) || 1;
       celdas += `<button class="gcell fill" style="--col:${colorSem(s)}"
-        title="${esc(c.codigo)} · ${esc(c.microorganismo)}"
-        onclick="app.detalle('${c.id}')"><span>${i + 1}</span></button>`;
+        title="${esc(c.codigo)} · ${esc(c.microorganismo)}${nv > 1 ? ` · ${nv} viales` : ""}"
+        onclick="app.detalle('${c.id}')"><span>${pos + 1}</span></button>`;
     } else {
-      celdas += `<span class="gcell"><span>${i + 1}</span></span>`;
+      celdas += `<span class="gcell"><span>${pos + 1}</span></span>`;
     }
   }
   return `<div class="grad">
     <div class="grad-h">
       <b>${info.nom}</b>
       <span class="pill b tiny">Gradilla ${num}${total > 1 ? " / " + total : ""}</span>
-      <span class="gcount">${chunk.length}/${cap}</span>
+      <span class="gcount">${llenas}/${cap}</span>
     </div>
     <div class="grid-cells" style="grid-template-columns:repeat(${cols},1fr)">${celdas}</div>
   </div>`;
