@@ -557,6 +557,19 @@ td .org{font-style:italic;font-weight:500}
 .btn.ghost:hover{background:var(--line)}
 @media (max-width:640px){ .reminder{flex-wrap:wrap} .reminder .rbtns{width:100%} .reminder .rbtns .btn{flex:1;justify-content:center} }
 
+
+/* ---------- SECCIONES PLEGABLES DEL FORMULARIO ---------- */
+.plg summary{
+  cursor:pointer;list-style:none;padding:9px 12px;border:1px dashed var(--line);border-radius:10px;
+  font-size:13px;font-weight:600;color:var(--ink-2);background:var(--line-2);user-select:none;
+}
+.plg summary::-webkit-details-marker{display:none}
+.plg summary::before{content:"+ ";font-family:var(--mono);color:var(--brand);font-weight:700}
+.plg[open] summary::before{content:"– "}
+.plg summary:hover{border-color:var(--brand-soft);color:var(--brand)}
+.plg summary .opt{font-weight:400;color:var(--ink-3)}
+.plg[open] summary{margin-bottom:12px;border-style:solid}
+
 /* ---------- IMPRESIÓN ---------- */
 @media print{
   .tabs,.banner-side,.rowbtns,.filters,.btn,.mfoot,#toasts,.install-bar{display:none!important}
@@ -900,9 +913,22 @@ function textoSem(s, tipo) {
 
 function cepasDeMes(mesId) { return state.cepas.filter(c => c.mesId === mesId); }
 
+// El mes entero se descarta junto: se cuenta desde el ÚLTIMO día del mes de ingreso.
 function vencimientoNativa(cepa) {
   if (!cepa.fechaIngreso) return null;
-  return sumarMeses(cepa.fechaIngreso, state.cfg.natRetencion);
+  return descarteDelMes(cepa.fechaIngreso);
+}
+function descarteDelMes(fecha) {
+  if (!fecha) return null;
+  const d = new Date(fecha + "T00:00");
+  if (isNaN(d)) return null;
+  const n = Number(state.cfg.natRetencion) || 6;
+  // día 0 del mes siguiente = último día de ese mes
+  return fmtISO(new Date(d.getFullYear(), d.getMonth() + n + 1, 0));
+}
+function recalcDescarte() {
+  const el = document.getElementById("fc_descsug");
+  if (el) el.value = fFecha(descarteDelMes(val("fc_fing"))) || "—";
 }
 
 /* ---- Toast ---- */
@@ -1919,17 +1945,24 @@ function formCepa(tipo, id) {
       </fieldset>
 
       <fieldset class="fset"><legend>Perfil de resistencia</legend>
+        <details class="plg" ${(c.perfiles || []).length ? "open" : ""}>
+        <summary>Marcar mecanismos de resistencia <span class="opt">(opcional)</span></summary>
         <div class="multi">
           ${cat("perfiles").map(p => `<label><input type="checkbox" class="fc_perfil" value="${esc(p)}" ${(c.perfiles || []).includes(p) ? "checked" : ""}><span>${esc(p)}</span></label>`).join("")}
         </div>
+        </details>
         <div class="fgrid" style="margin-top:14px">
-          <div class="f"><label>Enviada al LDSP / INS</label><select id="fc_ins">${opts(["No","Sí — pendiente de resultado","Sí — con resultado"], c.envioINS)}</select></div>
+          <div class="f"><label>Enviada al LDSP / INS</label><select id="fc_ins" onchange="app.toggleINS()">${opts(["No","Sí — pendiente de resultado","Sí — con resultado"], c.envioINS)}</select></div>
+        </div>
+        <div class="fgrid" id="insBox" style="margin-top:12px" ${(c.envioINS || "No").startsWith("Sí") ? "" : "hidden"}>
           <div class="f"><label>Fecha de envío</label><input type="date" id="fc_finsdate" value="${esc(c.fechaINS || "")}"></div>
           <div class="f full"><label>Resultado de la confirmación</label><input id="fc_insres" value="${esc(c.resultadoINS || "")}" placeholder="Ej. blaKPC positivo por PCR"></div>
         </div>
       </fieldset>
 
       <fieldset class="fset"><legend>Antibiograma <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-3)">(opcional — alimenta las estadísticas)</span></legend>
+        <details class="plg" ${(c.antibiograma || []).length ? "open" : ""}>
+        <summary>Registrar antibiograma <span class="opt">(opcional)</span></summary>
         <div class="abg" id="abgBox">
           ${cat("antibioticos").map(a => {
             const v = (c.antibiograma || []).find(x => x.atb === a)?.v || "";
@@ -1939,12 +1972,14 @@ function formCepa(tipo, id) {
             </div>`;
           }).join("")}
         </div>
+        </details>
       </fieldset>
       `}
 
       <fieldset class="fset"><legend>Conservación y ubicación</legend>
         <div class="fgrid">
-          <div class="f"><label>Fecha de ingreso al cepario <span class="req">*</span></label><input type="date" id="fc_fing" value="${esc(c.fechaIngreso || hoy())}"></div>
+          <div class="f"><label>Fecha de ingreso al cepario <span class="req">*</span></label><input type="date" id="fc_fing" value="${esc(c.fechaIngreso || hoy())}" onchange="app.recalcDescarte()"></div>
+          ${!esATCC ? `<div class="f"><label>Descarte sugerido</label><input id="fc_descsug" readonly style="background:var(--line-2)" value="${esc(fFecha(descarteDelMes(c.fechaIngreso || hoy())) || "—")}"><span class="hint">Todo el mes se descarta junto: se cuenta desde el último día del mes de ingreso + ${state.cfg.natRetencion} meses.</span></div>` : ""}
           <div class="f"><label>Medio / método</label><select id="fc_medio">${opts(cat("medios"), c.medio)}</select></div>
           <div class="f"><label>Equipo</label><select id="fc_equipo">${opts(cat("equipos"), c.ubicEquipo)}</select></div>
           <div class="f"><label>Caja / gradilla</label><input id="fc_caja" value="${esc(c.ubicCaja || "")}" placeholder="Caja A1"></div>
@@ -1954,14 +1989,6 @@ function formCepa(tipo, id) {
           <div class="f"><label>Motivo de conservación</label><select id="fc_motivo">${opts(cat("motivos"), c.motivo)}</select></div>
           <div class="f"><label>Responsable</label><input id="fc_resp" value="${esc(c.responsable || (usuarioActual()?usuarioActual().nombre:''))}" ${usuarioActual() ? "readonly style=\"background:var(--line-2)\"" : ""}>${usuarioActual() ? `<span class="hint">Se registra automáticamente con tu sesión</span>` : ""}</div>
           <div class="f"><label>Estado</label><select id="fc_estado">${opts(cat("estados"), c.estado || "Activa")}</select></div>
-        </div>
-      </fieldset>
-
-      <fieldset class="fset"><legend>Descarte</legend>
-        <div class="fgrid">
-          <div class="f"><label>Fecha de descarte</label><input type="date" id="fc_fdesc" value="${esc(c.fechaDescarte || "")}"></div>
-          <div class="f"><label>Método de inactivación</label><select id="fc_mdesc">${opts(["Autoclave 121 °C / 15 min","Incineración","Desinfección química","Traslado a otro laboratorio"], c.metodoDescarte)}</select></div>
-          <div class="f"><label>Responsable del descarte</label><input id="fc_rdesc" value="${esc(c.responsableDescarte || "")}"></div>
         </div>
       </fieldset>
 
@@ -2007,7 +2034,8 @@ async function saveCepa() {
     medio: val("fc_medio"), ubicEquipo: val("fc_equipo"), ubicCaja: val("fc_caja"),
     ubicPos: val("fc_pos"), viales: +val("fc_viales") || 1, posGrad: +val("fc_posgrad") || 0, motivo: val("fc_motivo"),
     responsable: val("fc_resp"), estado: val("fc_estado") || "Activa",
-    fechaDescarte: val("fc_fdesc"), metodoDescarte: val("fc_mdesc"), responsableDescarte: val("fc_rdesc"),
+    fechaDescarte: prev?.fechaDescarte || "", metodoDescarte: prev?.metodoDescarte || "",
+    responsableDescarte: prev?.responsableDescarte || "", motivoDescarte: prev?.motivoDescarte || "",
     observaciones: val("fc_obs"),
     creado: prev?.creado || new Date().toISOString(),
     historial: prev?.historial || []
@@ -2049,6 +2077,7 @@ async function saveCepa() {
   await guardar("cepas", c);
   cerrarModal();
   toast(id ? "Cambios guardados" : `Cepa ${c.codigo} registrada`, "ok");
+  if (!id && can("exportar")) preguntarEtiqueta(c.id);
 }
 
 async function borrarCepa(id) {
@@ -2089,6 +2118,7 @@ function detalle(id) {
         ${can("crear") ? `<button class="btn sm" onclick="app.formQC(null,'${c.id}')">Control de calidad</button>` : ""}
         ${can("crear") ? `<button class="btn sm primary" onclick="app.cerrar();app.formCepa('${c.tipo}','${c.id}')">Editar</button>` : ""}
         ${can("exportar") ? `<button class="btn sm" onclick="app.imprimirEtiqueta('${c.id}')">🏷 Etiqueta</button>` : ""}
+        ${can("crear") && !["Descartada","No viable","Agotada"].includes(c.estado) ? `<button class="btn sm danger" onclick="app.formDescarte('${c.id}')">Descartar</button>` : ""}
       </div>
 
       <fieldset class="fset"><legend>Conservación</legend>
@@ -2101,6 +2131,12 @@ function detalle(id) {
           ${it("Motivo", c.motivo)}
           ${it("Responsable", c.responsable)}
         </div>
+        ${c.fechaDescarte ? `<div class="dl" style="margin-top:12px">
+          ${it("Fecha del descarte", fFecha(c.fechaDescarte))}
+          ${it("Motivo", c.motivoDescarte)}
+          ${it("Método", c.metodoDescarte)}
+          ${it("Responsable del descarte", c.responsableDescarte)}
+        </div>` : ""}
       </fieldset>
 
       ${esATCC ? `
@@ -2203,7 +2239,6 @@ function verMes(mesId) {
     </div>
     <div class="mfoot2">
       ${can("eliminarMes") ? `<button class="btn danger" onclick="app.borrarMes('${mesId}')">Eliminar</button>` : ""}
-      ${can("exportar") ? `<button class="btn" onclick="app.imprimirEtiquetasMes('${mesId}')">🏷 Etiquetas</button>` : ""}
       ${can("crear") ? (state.meses.find(m=>m.id===mesId)?.descartado
         ? `<button class="btn" onclick="app.reactivarMes('${mesId}')">Reactivar mes</button>`
         : `<button class="btn" onclick="app.descartarMes('${mesId}')">Descartar mes</button>`) : ""}
@@ -3129,6 +3164,75 @@ function imprimirEtiquetaGradilla(mesId, tipo, rack, total) {
 }
 
 
+
+/* ---------- Imprimir etiqueta recién creada ---------- */
+function preguntarEtiqueta(id) {
+  const c = state.cepas.find(x => x.id === id);
+  if (!c) return;
+  abrirModal(`
+    <div class="mhead"><div><h3>Cepa registrada</h3>
+      <div class="msub">${esc(c.codigo)} · ${esc(c.microorganismo)}</div></div>
+      <button class="x" onclick="app.cerrar()">×</button></div>
+    <div class="mbody"><p style="font-size:14px;color:var(--ink-2)">¿Quieres imprimir la etiqueta de esta cepa ahora?</p></div>
+    <div class="mfoot2">
+      <button class="btn" onclick="app.cerrar()">Ahora no</button>
+      <button class="btn primary" onclick="app.cerrar();app.imprimirEtiqueta('${c.id}')">🏷 Imprimir etiqueta</button>
+    </div>`, "narrow");
+}
+
+/* ---------- Descarte de una cepa (pide el motivo) ---------- */
+function formDescarte(id) {
+  if (!can("crear")) return toast("No tienes permiso para descartar.", "err");
+  const c = state.cepas.find(x => x.id === id);
+  if (!c) return;
+  const venc = c.tipo === "atcc" ? c.fechaVence : vencimientoNativa(c);
+  const d = venc ? diasEntre(hoy(), venc) : null;
+  const cumplido = d !== null && d <= 0;
+  abrirModal(`
+    <div class="mhead"><div><h3>Descartar cepa</h3>
+      <div class="msub">${esc(c.codigo)} · ${esc(c.microorganismo)}</div></div>
+      <button class="x" onclick="app.cerrar()">×</button></div>
+    <div class="mbody">
+      ${cumplido
+        ? `<p class="pill v" style="display:inline-block;margin-bottom:14px">Cumplió su fecha de descarte (${fFecha(venc)})</p>`
+        : `<p class="pill a" style="display:inline-block;margin-bottom:14px">Descarte anticipado — su fecha era ${fFecha(venc) || "sin definir"}</p>`}
+      <div class="fgrid">
+        <div class="f"><label>Fecha del descarte</label><input type="date" id="fd_fecha" value="${hoy()}"></div>
+        <div class="f"><label>Método de inactivación</label><select id="fd_metodo">${opts(["Autoclave 121 °C / 15 min","Incineración","Desinfección química","Traslado a otro laboratorio"], c.metodoDescarte)}</select></div>
+        <div class="f"><label>Responsable</label><input id="fd_resp" value="${esc(state.usuario?.nombre || c.responsable || "")}"></div>
+        <div class="f full"><label>Motivo del descarte ${cumplido ? "" : `<span class="req">*</span>`}</label>
+          <input id="fd_motivo" value="${cumplido ? "Cumplió el tiempo de conservación" : ""}" ${cumplido ? `readonly style="background:var(--line-2)"` : `placeholder="Ej. contaminación, no viable, agotada…"`}>
+          ${cumplido ? `<span class="hint">Se registra automáticamente por fecha de vencimiento.</span>` : `<span class="hint">Aún no cumple su tiempo; indica por qué se descarta antes.</span>`}
+        </div>
+      </div>
+    </div>
+    <div class="mfoot2">
+      <button class="btn" onclick="app.cerrar()">Cancelar</button>
+      <button class="btn danger" onclick="app.confirmarDescarte('${c.id}',${cumplido})">Descartar</button>
+    </div>`);
+}
+
+async function confirmarDescarte(id, cumplido) {
+  const c = state.cepas.find(x => x.id === id);
+  if (!c) return;
+  const motivo = val("fd_motivo");
+  if (!cumplido && !motivo) return toast("Indica el motivo del descarte anticipado.", "err");
+  c.estado = "Descartada";
+  c.fechaDescarte = val("fd_fecha") || hoy();
+  c.metodoDescarte = val("fd_metodo");
+  c.responsableDescarte = val("fd_resp");
+  c.motivoDescarte = motivo;
+  c.historial = c.historial || [];
+  c.historial.push({ f: new Date().toISOString(), t: `Descartada (${motivo}) · ${c.metodoDescarte || "sin método"}` });
+  await guardar("cepas", c);
+  cerrarModal(); toast(`${c.codigo} descartada`, "ok");
+}
+
+function toggleINS() {
+  const box = document.getElementById("insBox");
+  if (box) box.hidden = !(val("fc_ins") || "No").startsWith("Sí");
+}
+
 window.app = {
   ir, setF, limpiarF, formCepa, saveCepa, borrarCepa, detalle, subirPase, setAB, recalcPase,
   verMes, formMes, saveMes, borrarMes, formQC, saveQC, borrarQC,
@@ -3138,7 +3242,8 @@ window.app = {
   formUsuario, saveUsuario, borrarUsuario, verPwd, rolCambio,
   restaurarPapelera, purgarPapelera, vaciarPapelera,
   descartarMes, reactivarMes, descartarGradilla, posponerDescarte, reconocerSemaforo,
-  imprimirEtiqueta, imprimirEtiquetasMes, imprimirEtiquetaGradilla
+  imprimirEtiqueta, imprimirEtiquetaGradilla,
+  recalcDescarte, toggleINS, preguntarEtiqueta, formDescarte, confirmarDescarte
 };
 window.checkPin = checkPin;
 
