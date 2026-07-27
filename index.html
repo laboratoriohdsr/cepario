@@ -542,6 +542,21 @@ td .org{font-style:italic;font-weight:500}
   .gcell{max-width:24px} .gcell span{font-size:7px}
 }
 
+
+/* ---------- RECORDATORIOS ---------- */
+.reminder{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;margin-bottom:12px;border:1px solid var(--line);background:var(--card);box-shadow:var(--sh-1)}
+.reminder.r{border-left:4px solid var(--rojo)}
+.reminder.a{border-left:4px solid var(--amarillo)}
+.reminder .rico{font-size:22px;flex-shrink:0}
+.reminder .rtx{flex:1;min-width:0}
+.reminder .rtx b{font-size:14px}
+.reminder .rtx .m{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.reminder .rbtns{display:flex;gap:7px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.grad-f{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.btn.ghost{background:var(--line-2);color:var(--ink-2)}
+.btn.ghost:hover{background:var(--line)}
+@media (max-width:640px){ .reminder{flex-wrap:wrap} .reminder .rbtns{width:100%} .reminder .rbtns .btn{flex:1;justify-content:center} }
+
 /* ---------- IMPRESIÓN ---------- */
 @media print{
   .tabs,.banner-side,.rowbtns,.filters,.btn,.mfoot,#toasts,.install-bar{display:none!important}
@@ -742,6 +757,8 @@ const DEFAULT_CFG = {
   // Gradillas (visual)
   gradillaNatCap: 100, gradillaNatCols: 10,
   gradillaAtccCap: 50, gradillaAtccCols: 10,
+  cDescartado: "#0F766E",          // color de meses/gradillas descartados
+  stickerW: 50, stickerH: 25,      // tamaño de etiqueta en mm
   catalogos: {}
 };
 
@@ -854,6 +871,8 @@ function semaforoATCC(cepa) {
 function semaforo(cepa) { return cepa.tipo === "atcc" ? semaforoATCC(cepa) : semaforoNativa(cepa); }
 function semaforoMes(mesId) {
   const c = state.cfg;
+  const m = state.meses.find(x => x.id === mesId);
+  if (m && m.descartado) return "descartado";
   if (c.criterioMes === "peor") {
     const cs = cepasDeMes(mesId).filter(x => semaforo(x) !== "gris");
     if (!cs.length) return "gris";
@@ -869,10 +888,11 @@ function semaforoMes(mesId) {
 }
 function colorSem(s) {
   const c = state.cfg;
-  return { verde: c.cVerde, amarillo: c.cAmarillo, rojo: c.cRojo, gris: "#94A3B8" }[s] || "#94A3B8";
+  return { verde: c.cVerde, amarillo: c.cAmarillo, rojo: c.cRojo, descartado: c.cDescartado, gris: "#94A3B8" }[s] || "#94A3B8";
 }
-function claseSem(s) { return { verde: "v", amarillo: "a", rojo: "r", gris: "g" }[s] || "g"; }
+function claseSem(s) { return { verde: "v", amarillo: "a", rojo: "r", descartado: "b", gris: "g" }[s] || "g"; }
 function textoSem(s, tipo) {
+  if (s === "descartado") return "descartado";
   if (s === "gris") return "inactiva";
   if (tipo === "atcc") return { verde: "vigente", amarillo: "por vencer", rojo: "vencida / pase límite" }[s];
   return { verde: "vigente", amarillo: "por vencer", rojo: "vencida" }[s];
@@ -1140,6 +1160,7 @@ function aplicarMarca() {
   const r = document.documentElement.style;
   r.setProperty("--verde", c.cVerde); r.setProperty("--amarillo", c.cAmarillo);
   r.setProperty("--rojo", c.cRojo); r.setProperty("--brand", c.cMarca);
+  r.setProperty("--descartado", c.cDescartado || "#0F766E");
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1178,6 +1199,30 @@ function alertas() {
   return out.sort((a, b) => ({ r: 0, a: 1, b: 2 }[a.n] - { r: 0, a: 1, b: 2 }[b.n]));
 }
 
+function bannersRecordatorio() {
+  let html = "";
+  const porDesc = mesesPorDescartar();
+  porDesc.forEach(mid => {
+    const n = cepasDeMes(mid).filter(c => !["Descartada","No viable","Agotada"].includes(c.estado)).length;
+    html += `<div class="reminder r">
+      <div class="rico">🗓️</div>
+      <div class="rtx"><b>Recuerda descartar ${mesLabel(mid)}</b>
+        <div class="m">Cumplió los ${state.cfg.natRetencion} meses de conservación · ${n} cepa(s). Al descartar se conservan los registros.</div></div>
+      <div class="rbtns">
+        ${can("crear") ? `<button class="btn sm primary" onclick="app.descartarMes('${mid}')">Descartar ahora</button>` : ""}
+        <button class="btn sm ghost" onclick="app.posponerDescarte('${mid}')">Recordar mañana</button>
+      </div></div>`;
+  });
+  cambiosSemaforo().forEach(ch => {
+    html += `<div class="reminder a">
+      <div class="rico">🎨</div>
+      <div class="rtx"><b>${mesLabel(ch.mid)} cambió de semáforo</b>
+        <div class="m">Pasó de <b>${textoSem(ch.de,"nativa")}</b> a <b>${textoSem(ch.a,"nativa")}</b>. Recuerda actualizar la marca/etiqueta de esa gradilla.</div></div>
+      <div class="rbtns"><button class="btn sm ghost" onclick="app.reconocerSemaforo('${ch.mid}')">Entendido</button></div></div>`;
+  });
+  return html;
+}
+
 /* ══════════════════════════════════════════════════════════════
    8. VISTA: INICIO
    ══════════════════════════════════════════════════════════════ */
@@ -1210,6 +1255,7 @@ function vInicio() {
       <div class="rowbtns">${btnAgregar(true)}</div>
     </div>
 
+    ${bannersRecordatorio()}
     <div class="grid kpis" style="margin-bottom:16px">
       <div class="kpi"><div class="lbl">En custodia</div><div class="val">${act.length}</div><div class="sub">${nat.length} nativas · ${atc.length} ATCC</div></div>
       <div class="kpi v"><div class="lbl">Vigentes</div><div class="val">${porSem("verde")}</div><div class="sub">dentro del periodo</div></div>
@@ -1695,6 +1741,7 @@ function vConfig() {
         <div class="f"><label>Color verde</label><input type="color" id="cf_cv" value="${c.cVerde}" style="height:42px;padding:4px"></div>
         <div class="f"><label>Color amarillo</label><input type="color" id="cf_ca" value="${c.cAmarillo}" style="height:42px;padding:4px"></div>
         <div class="f"><label>Color rojo</label><input type="color" id="cf_cr" value="${c.cRojo}" style="height:42px;padding:4px"></div>
+        <div class="f"><label>Color descartado</label><input type="color" id="cf_cdesc" value="${c.cDescartado}" style="height:42px;padding:4px"><span class="hint">Meses y gradillas descartados</span></div>
         <div class="f"><label>Color de la tarjeta del mes según</label>
           <select id="cf_crit">
             <option value="edad" ${c.criterioMes==="edad"?"selected":""}>Antigüedad del mes</option>
@@ -1728,6 +1775,14 @@ function vConfig() {
         <div class="f"><label>Columnas · nativas</label><input type="number" id="cf_gncols" min="1" max="30" value="${c.gradillaNatCols}"><span class="hint">Ej.: 100 espacios y 10 columnas = 10×10</span></div>
         <div class="f"><label>Espacios por gradilla · ATCC</label><input type="number" id="cf_gacap" min="1" max="400" value="${c.gradillaAtccCap}"></div>
         <div class="f"><label>Columnas · ATCC</label><input type="number" id="cf_gacols" min="1" max="30" value="${c.gradillaAtccCols}"><span class="hint">Ej.: 50 espacios y 10 columnas = 5×10</span></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fset"><legend>Etiquetas / stickers</legend>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-bottom:12px">Tamaño del sticker de tu impresora. Las etiquetas de cepas y de gradillas se imprimen con esta medida.</p>
+      <div class="fgrid">
+        <div class="f"><label>Ancho (mm)</label><input type="number" id="cf_stw" min="10" max="150" value="${c.stickerW}"></div>
+        <div class="f"><label>Alto (mm)</label><input type="number" id="cf_sth" min="10" max="150" value="${c.stickerH}"></div>
       </div>
     </fieldset>
 
@@ -2033,6 +2088,7 @@ function detalle(id) {
         ${can("crear") && esATCC ? `<button class="btn sm" onclick="app.subirPase('${c.id}')">Registrar nuevo pase</button>` : ""}
         ${can("crear") ? `<button class="btn sm" onclick="app.formQC(null,'${c.id}')">Control de calidad</button>` : ""}
         ${can("crear") ? `<button class="btn sm primary" onclick="app.cerrar();app.formCepa('${c.tipo}','${c.id}')">Editar</button>` : ""}
+        ${can("exportar") ? `<button class="btn sm" onclick="app.imprimirEtiqueta('${c.id}')">🏷 Etiqueta</button>` : ""}
       </div>
 
       <fieldset class="fset"><legend>Conservación</legend>
@@ -2146,10 +2202,13 @@ function verMes(mesId) {
       <fieldset class="fset"><legend>Cepas de referencia ATCC (${atc.length})</legend>${tabla(atc)}</fieldset>
     </div>
     <div class="mfoot2">
-      ${can("eliminarMes") ? `<button class="btn danger" onclick="app.borrarMes('${mesId}')">Eliminar mes</button>` : ""}
+      ${can("eliminarMes") ? `<button class="btn danger" onclick="app.borrarMes('${mesId}')">Eliminar</button>` : ""}
+      ${can("exportar") ? `<button class="btn" onclick="app.imprimirEtiquetasMes('${mesId}')">🏷 Etiquetas</button>` : ""}
+      ${can("crear") ? (state.meses.find(m=>m.id===mesId)?.descartado
+        ? `<button class="btn" onclick="app.reactivarMes('${mesId}')">Reactivar mes</button>`
+        : `<button class="btn" onclick="app.descartarMes('${mesId}')">Descartar mes</button>`) : ""}
       <button class="btn" onclick="app.cerrar()">Cerrar</button>
-      ${can("crear") ? `<button class="btn" onclick="app.cerrar();app.formCepa('atcc')">+ ATCC</button>
-      <button class="btn primary" onclick="app.cerrar();app.formCepa('nativa')">+ Nativa</button>` : ""}
+      ${can("crear") ? `<button class="btn primary" onclick="app.cerrar();app.formCepa('nativa')">+ Nativa</button>` : ""}
     </div>`, "wide");
 }
 
@@ -2174,7 +2233,9 @@ async function saveMes() {
   const id = `${a}-${m}`;
   if (state.meses.some(x => x.id === id)) { cerrarModal(); return toast("Ese mes ya existe en el cepario", "warn"); }
   await guardar("meses", { id, anio: +a, mes: +m, auto: false, creado: new Date().toISOString() });
-  cerrarModal(); toast(`${mesLabel(id)} agregado`, "ok");
+  try { localStorage.setItem("sem_" + id, "verde"); } catch (e) {}
+  cerrarModal();
+  toast(`${mesLabel(id)} agregado · recuerda semaforizar su gradilla en verde 🟢`, "ok");
 }
 
 async function borrarMes(id) {
@@ -2263,7 +2324,9 @@ function saveCfg() {
     bloqueoMin: n("cf_bloqueo", 60),
     prefijoNat: (val("cf_pnat") || "NAT").toUpperCase(), prefijoAtcc: (val("cf_patcc") || "REF").toUpperCase(),
     gradillaNatCap: n("cf_gncap", 100), gradillaNatCols: n("cf_gncols", 10),
-    gradillaAtccCap: n("cf_gacap", 50), gradillaAtccCols: n("cf_gacols", 10)
+    gradillaAtccCap: n("cf_gacap", 50), gradillaAtccCols: n("cf_gacols", 10),
+    cDescartado: val("cf_cdesc") || "#0F766E",
+    stickerW: n("cf_stw", 50), stickerH: n("cf_sth", 25)
   });
   if (c.natAmarillo < c.natVerde) c.natAmarillo = c.natVerde;
   c.catalogos = c.catalogos || {};
@@ -2344,7 +2407,7 @@ let pendiente = null;
 function render() {
   clearTimeout(pendiente);
   pendiente = setTimeout(() => {
-    renderTabs(); controlarAcceso();
+    renderTabs(); controlarAcceso(); sembrarSemaforo();
     ({ inicio: vInicio, cepario: vCepario, gradillas: vGradillas, cepas: vCepas, qc: vQC, stats: vStats, config: vConfig }[state.view] || vInicio)();
   }, 20);
 }
@@ -2586,8 +2649,8 @@ function secuenciaGradilla(activos) {
 
 // Siguiente espacio libre sugerido para una cepa nueva de ese mes+tipo.
 function siguientePosicion(tipo, mesId, excluirId) {
-  const activos = cepasDeMes(mesId || mesActual()).filter(c => c.tipo === tipo && cepaActivaGrad(c) && c.id !== excluirId);
-  return secuenciaGradilla(activos).length + 1;
+  const cs = cepasGradilla(mesId || mesActual(), tipo).filter(c => c.id !== excluirId);
+  return secuenciaGradilla(cs).length + 1;
 }
 
 function vGradillas() {
@@ -2614,10 +2677,11 @@ function vGradillas() {
 
   let algo = false;
   meses.forEach(mid => {
-    const bloquesMes = tipos.map(info => {
-      const activos = cepasDeMes(mid).filter(c => c.tipo === info.t && activa(c));
-      if (!activos.length) return "";
-      const occ = secuenciaGradilla(activos);
+    const bloquesMes = tipos.map(base => {
+      const info = { ...base, mid };
+      const cs = cepasGradilla(mid, info.t);
+      if (!cs.length) return "";
+      const occ = secuenciaGradilla(cs);
       const nRacks = Math.max(1, Math.ceil(occ.length / info.cap));
       let out = "";
       for (let r = 0; r < nRacks; r++) out += gradilla(info, r + 1, nRacks, occ, r * info.cap);
@@ -2637,16 +2701,18 @@ function vGradillas() {
 
 function gradilla(info, num, total, occ, offset) {
   const cap = info.cap, cols = Math.max(1, Math.min(info.cap, info.cols));
-  let celdas = "", llenas = 0;
+  let celdas = "", llenas = 0, hayActiva = false;
   for (let i = 0; i < cap; i++) {
     const pos = offset + i;
     const c = occ[pos];
     if (c) {
       llenas++;
-      const s = semaforo(c);
+      const desc = estaDescartada(c);
+      if (!desc) hayActiva = true;
+      const s = desc ? "descartado" : semaforo(c);
       const nv = Number(c.viales) || 1;
       celdas += `<button class="gcell fill" style="--col:${colorSem(s)}"
-        title="${esc(c.codigo)} · ${esc(c.microorganismo)}${nv > 1 ? ` · ${nv} viales` : ""}"
+        title="${esc(c.codigo)} · ${esc(c.microorganismo)}${nv > 1 ? ` · ${nv} viales` : ""}${desc ? " · descartada" : ""}"
         onclick="app.detalle('${c.id}')"><span>${pos + 1}</span></button>`;
     } else {
       celdas += `<span class="gcell"><span>${pos + 1}</span></span>`;
@@ -2659,6 +2725,10 @@ function gradilla(info, num, total, occ, offset) {
       <span class="gcount">${llenas}/${cap}</span>
     </div>
     <div class="grid-cells" style="grid-template-columns:repeat(${cols},1fr)">${celdas}</div>
+    <div class="grad-f">
+      ${can("exportar") ? `<button class="btn ghost sm" onclick="app.imprimirEtiquetaGradilla('${info.mid}','${info.t}',${num},${total})">🏷 Etiqueta</button>` : ""}
+      ${can("crear") && hayActiva ? `<button class="btn ghost sm" onclick="app.descartarGradilla('${info.mid}','${info.t}',${num})">Descartar gradilla</button>` : ""}
+    </div>
   </div>`;
 }
 
@@ -2897,6 +2967,168 @@ function panelPapelera() {
 }
 
 
+/* ══════════════════════════════════════════════════════════════
+   v3 — DESCARTE DE MESES/GRADILLAS · RECORDATORIOS · ETIQUETAS
+   ══════════════════════════════════════════════════════════════ */
+
+function estaDescartada(c) {
+  if (["Descartada", "No viable", "Agotada"].includes(c.estado)) return true;
+  const m = state.meses.find(x => x.id === c.mesId);
+  return !!(m && m.descartado);
+}
+// Todas las cepas de un mes+tipo para dibujar la gradilla (activas y descartadas).
+function cepasGradilla(mesId, tipo) {
+  return state.cepas.filter(c => c.mesId === mesId && c.tipo === tipo);
+}
+
+/* ---------- Descarte de mes completo ---------- */
+function mesVencido(mesId) {
+  const m = state.meses.find(x => x.id === mesId);
+  if (m && m.descartado) return false;
+  const hayActivas = cepasDeMes(mesId).some(c => !["Descartada", "No viable", "Agotada"].includes(c.estado));
+  return hayActivas && edadMeses(mesId) >= state.cfg.natRetencion;
+}
+async function descartarMes(id, silencioso) {
+  if (!can("crear")) return toast("No tienes permiso para descartar.", "err");
+  const cs = cepasDeMes(id).filter(c => !["Descartada", "No viable", "Agotada"].includes(c.estado));
+  if (!silencioso && !confirm(`¿Descartar ${mesLabel(id)}?\n\nSe marcarán como descartadas ${cs.length} cepa(s) y sus gradillas. Los registros NO se borran: el mes seguirá visible en otro color.`)) return;
+  const m = state.meses.find(x => x.id === id) || { id, anio: +id.split("-")[0], mes: +id.split("-")[1] };
+  m.descartado = true; m.fechaDescMes = hoy(); m.descPor = state.usuario?.nombre || "—";
+  await guardar("meses", m);
+  for (const c of cs) {
+    c.estado = "Descartada"; c.fechaDescarte = c.fechaDescarte || hoy();
+    c.historial = c.historial || [];
+    c.historial.push({ f: new Date().toISOString(), t: `Descartada con el mes ${mesLabel(id)}` });
+    await guardar("cepas", c);
+  }
+  try { localStorage.removeItem("descsnooze_" + id); } catch (e) {}
+  cerrarModal(); toast(`${mesLabel(id)} descartado`, "ok");
+}
+async function reactivarMes(id) {
+  if (!can("crear")) return;
+  if (!confirm(`¿Reactivar ${mesLabel(id)}? Las cepas descartadas con el mes volverán a estado Activa.`)) return;
+  const m = state.meses.find(x => x.id === id);
+  if (m) { m.descartado = false; delete m.fechaDescMes; delete m.descPor; await guardar("meses", m); }
+  for (const c of cepasDeMes(id)) {
+    if (c.estado === "Descartada") { c.estado = "Activa"; await guardar("cepas", c); }
+  }
+  cerrarModal(); toast(`${mesLabel(id)} reactivado`, "ok");
+}
+
+/* ---------- Descarte de una gradilla específica ---------- */
+async function descartarGradilla(mesId, tipo, rackNum) {
+  if (!can("crear")) return toast("Sin permiso.", "err");
+  const cap = tipo === "atcc" ? (state.cfg.gradillaAtccCap || 50) : (state.cfg.gradillaNatCap || 100);
+  const activos = cepasGradilla(mesId, tipo).filter(c => !["Descartada", "No viable", "Agotada"].includes(c.estado));
+  const occ = secuenciaGradilla(activos);
+  const afectadas = [...new Set(occ.slice((rackNum - 1) * cap, rackNum * cap).filter(Boolean))];
+  if (!afectadas.length) return toast("Esa gradilla no tiene cepas activas.", "warn");
+  if (!confirm(`¿Descartar la gradilla ${rackNum} de ${mesLabel(mesId)} (${tipo === "atcc" ? "ATCC" : "nativas"})?\n\nSe marcarán ${afectadas.length} cepa(s) como descartadas. Se conservan los registros.`)) return;
+  for (const c of afectadas) {
+    c.estado = "Descartada"; c.fechaDescarte = c.fechaDescarte || hoy();
+    c.historial = c.historial || [];
+    c.historial.push({ f: new Date().toISOString(), t: `Descartada (gradilla ${rackNum} · ${mesLabel(mesId)})` });
+    await guardar("cepas", c);
+  }
+  toast("Gradilla descartada", "ok");
+}
+
+/* ---------- Recordatorio diario: meses por descartar ---------- */
+function mesesPorDescartar() {
+  return [...new Set(state.cepas.map(c => c.mesId).filter(Boolean))]
+    .filter(mid => mesVencido(mid))
+    .filter(mid => { try { return localStorage.getItem("descsnooze_" + mid) !== hoy(); } catch (e) { return true; } })
+    .sort();
+}
+function posponerDescarte(mid) { try { localStorage.setItem("descsnooze_" + mid, hoy()); } catch (e) {} toast("Te lo recordaré mañana", "ok"); render(); }
+
+/* ---------- Recordatorio: cambios de semaforización ---------- */
+function sembrarSemaforo() {
+  [...new Set(state.cepas.map(c => c.mesId).filter(Boolean))].forEach(mid => {
+    try { if (localStorage.getItem("sem_" + mid) === null) localStorage.setItem("sem_" + mid, semaforoMes(mid)); } catch (e) {}
+  });
+}
+function cambiosSemaforo() {
+  const out = [];
+  [...new Set(state.cepas.map(c => c.mesId).filter(Boolean))].forEach(mid => {
+    const s = semaforoMes(mid);
+    if (s === "descartado") return;
+    let prev = null; try { prev = localStorage.getItem("sem_" + mid); } catch (e) {}
+    if (prev && prev !== s) out.push({ mid, de: prev, a: s });
+  });
+  return out;
+}
+function reconocerSemaforo(mid) { try { localStorage.setItem("sem_" + mid, semaforoMes(mid)); } catch (e) {} toast("Anotado", "ok"); render(); }
+
+/* ══════════════════════════════════════════════════════════════
+   ETIQUETAS / STICKERS  (tamaño configurable, por defecto 50 × 25 mm)
+   ══════════════════════════════════════════════════════════════ */
+function imprimirDoc(htmlDoc) {
+  let f = document.getElementById("printFrame");
+  if (!f) {
+    f = document.createElement("iframe");
+    f.id = "printFrame";
+    f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+    document.body.appendChild(f);
+  }
+  const d = f.contentWindow.document;
+  d.open(); d.write(htmlDoc); d.close();
+  const go = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { window.print(); } };
+  if (d.readyState === "complete") setTimeout(go, 200); else f.onload = () => setTimeout(go, 200);
+}
+
+function etiquetaCepaHTML(c) {
+  const venc = c.tipo === "atcc" ? c.fechaVence : vencimientoNativa(c);
+  const resist = (c.perfiles || []).join(", ");
+  return `<div class="lbl">
+    <div class="l-org">${esc(c.microorganismo || "—")}</div>
+    <div class="l-code"><b>${esc(c.codigo || "")}</b>${c.numMuestra ? ` · Lab ${esc(c.numMuestra)}` : ""}</div>
+    ${c.paciente ? `<div class="l-min">Pac: ${esc(c.paciente)}</div>` : ""}
+    ${resist ? `<div class="l-res">${esc(resist)}</div>` : ""}
+    <div class="l-min">Aisl ${fFecha(c.fechaAislamiento) || "—"} · Cong ${fFecha(c.fechaIngreso) || "—"}</div>
+    <div class="l-desc">Descartar: ${fFecha(venc) || "—"}</div>
+  </div>`;
+}
+function etiquetaGradillaHTML(mesId, tipo, rack, total) {
+  return `<div class="lbl gl">
+    <div class="g-lab">CEPARIO · ${tipo === "atcc" ? "REFERENCIA ATCC" : "NATIVAS (PACIENTE)"}</div>
+    <div class="g-mes">${mesLabel(mesId)}</div>
+    <div class="g-num">Gradilla ${rack}${total > 1 ? " de " + total : ""}</div>
+    <div class="g-sub">${esc(state.cfg.subtitulo || "")}</div>
+  </div>`;
+}
+function estiloEtiquetas() {
+  const w = state.cfg.stickerW || 50, hh = state.cfg.stickerH || 25;
+  return `<style>
+    @page{size:${w}mm ${hh}mm;margin:0}
+    *{box-sizing:border-box;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    html,body{margin:0;padding:0}
+    .lbl{width:${w}mm;height:${hh}mm;padding:1.3mm 2mm;overflow:hidden;page-break-after:always;display:flex;flex-direction:column;justify-content:center;line-height:1.12}
+    .l-org{font-style:italic;font-weight:800;font-size:2.7mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .l-code{font-size:2.4mm;font-family:ui-monospace,Menlo,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .l-res{font-size:2mm;font-weight:700;color:#b00000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .l-min{font-size:1.9mm;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .l-desc{font-size:2.1mm;font-weight:800}
+    .gl{align-items:center;text-align:center;justify-content:center}
+    .g-lab{font-size:2mm;font-weight:700;letter-spacing:.04em;color:#444}
+    .g-mes{font-size:4.2mm;font-weight:800;text-transform:capitalize;margin:.4mm 0}
+    .g-num{font-size:3mm;font-weight:700}
+    .g-sub{font-size:1.8mm;color:#555;margin-top:.6mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  </style>`;
+}
+function imprimirEtiquetas(cepas) {
+  if (!can("exportar")) return toast("Sin permiso para imprimir.", "err");
+  if (!cepas.length) return toast("No hay cepas para etiquetar.", "warn");
+  imprimirDoc(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">${estiloEtiquetas()}</head><body>${cepas.map(etiquetaCepaHTML).join("")}</body></html>`);
+}
+function imprimirEtiqueta(id) { const c = state.cepas.find(x => x.id === id); if (c) imprimirEtiquetas([c]); }
+function imprimirEtiquetasMes(mesId) { imprimirEtiquetas(cepasDeMes(mesId).filter(c => !["Descartada", "No viable", "Agotada"].includes(c.estado))); }
+function imprimirEtiquetaGradilla(mesId, tipo, rack, total) {
+  if (!can("exportar")) return toast("Sin permiso.", "err");
+  imprimirDoc(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">${estiloEtiquetas()}</head><body>${etiquetaGradillaHTML(mesId, tipo, rack, total)}</body></html>`);
+}
+
+
 window.app = {
   ir, setF, limpiarF, formCepa, saveCepa, borrarCepa, detalle, subirPase, setAB, recalcPase,
   verMes, formMes, saveMes, borrarMes, formQC, saveQC, borrarQC,
@@ -2904,7 +3136,9 @@ window.app = {
   imprimir, vGradillas,
   entrar, entrarOtro, cerrarSesion, formPerfil, cambiarPass,
   formUsuario, saveUsuario, borrarUsuario, verPwd, rolCambio,
-  restaurarPapelera, purgarPapelera, vaciarPapelera
+  restaurarPapelera, purgarPapelera, vaciarPapelera,
+  descartarMes, reactivarMes, descartarGradilla, posponerDescarte, reconocerSemaforo,
+  imprimirEtiqueta, imprimirEtiquetasMes, imprimirEtiquetaGradilla
 };
 window.checkPin = checkPin;
 
